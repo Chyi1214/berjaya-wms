@@ -1,0 +1,155 @@
+/* CSS = Cascading Style Sheets - makes HTML look pretty */
+/* Comments in CSS use /* and */ 
+
+/* Reset some default browser styles for consistency */
+* {
+    margin: 0;           /* Remove default spacing around elements */
+    padding: 0;          /* Remove default inner spacing */
+    box-sizing: border-box;  /* Makes sizing more predictable */
+}
+
+/* Body styles - affects the entire page */
+body {
+    font-family: Arial, sans-serif;  /* Easy-to-read font */
+    line-height: 1.6;               /* Space between lines of text */
+    color: #333;                    /* Dark gray text color */
+    background-color: #f4f4f4;      /* Light gray background */
+    min-height: 100vh;              /* At least full screen height */
+    display: flex;                  /* Flexbox layout */
+    flex-direction: column;         /* Stack elements vertically */
+}
+
+/* Header styles - the top section */
+header {
+    background-color: #2c5aa0;      /* Blue background (professional) */
+    color: white;                   /* White text */
+    text-align: center;             /* Center the text */
+    padding: 1rem;                  /* Space around content (1rem = 16px) */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);  /* Subtle shadow underneath */
+}
+
+header h1 {
+    font-size: 1.8rem;              /* Bigger text for title */
+    margin-bottom: 0.5rem;          /* Space below the title */
+}
+
+header p {
+    font-size: 0.9rem;              /* Smaller subtitle text */
+    opacity: 0.9;                   /* Slightly transparent */
+}
+
+/* Main content area */
+main {
+    flex: 1;                        /* Take up remaining space */
+    padding: 1rem;                  /* Space around content */
+    max-width: 600px;               /* Don't get too wide on big screens */
+    margin: 0 auto;                 /* Center on page */
+    width: 100%;                    /* Full width on small screens */
+}
+
+/* Section styles - for login and inventory sections */
+section {
+    background-color: white;        /* White background */
+    padding: 2rem;                  /* Generous padding */
+    margin-bottom: 1rem;            /* Space between sections */
+    border-radius: 8px;             /* Rounded corners */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);  /* Subtle shadow */
+}
+
+/* Heading styles within sections */
+section h2 {
+    color: #2c5aa0;                 /* Match header color */
+    margin-bottom: 1rem;            /* Space below headings */
+    text-align: center;             /* Center headings */
+}
+
+/* Button styles - very important for mobile! */
+button {
+    background-color: #4285f4;      /* Google blue color */
+    color: white;                   /* White text */
+    border: none;                   /* Remove default border */
+    padding: 12px 24px;             /* Space inside button */
+    border-radius: 6px;             /* Rounded corners */
+    font-size: 1rem;                /* Readable text size */
+    cursor: pointer;                /* Hand cursor on hover */
+    transition: background-color 0.3s;  /* Smooth color change */
+    width: 100%;                    /* Full width on mobile */
+    margin: 0.5rem 0;               /* Space above and below */
+    min-height: 44px;               /* Apple recommends 44px minimum for touch */
+}
+
+/* Button hover effect - when user hovers mouse or touches */
+button:hover {
+    background-color: #3367d6;      /* Darker blue */
+}
+
+/* Button active effect - when being pressed */
+button:active {
+    transform: translateY(1px);     /* Slight downward motion */
+}
+
+/* Logout button - different color */
+#logout-btn {
+    background-color: #dc3545;      /* Red color */
+    margin-top: 1rem;               /* Extra space on top */
+}
+
+#logout-btn:hover {
+    background-color: #c82333;      /* Darker red */
+}
+
+/* User info display */
+#user-info {
+    background-color: #e8f5e8;      /* Light green background */
+    padding: 1rem;                  /* Space inside */
+    border-radius: 6px;             /* Rounded corners */
+    margin-bottom: 1rem;            /* Space below */
+    text-align: center;             /* Center text */
+}
+
+/* Inventory list area */
+#inventory-list {
+    background-color: #f8f9fa;      /* Very light gray */
+    padding: 1rem;                  /* Space inside */
+    border-radius: 6px;             /* Rounded corners */
+    min-height: 200px;              /* Minimum height */
+    text-align: center;             /* Center text for now */
+}
+
+/* Footer styles */
+footer {
+    background-color: #333;         /* Dark background */
+    color: white;                   /* White text */
+    text-align: center;             /* Center text */
+    padding: 1rem;                  /* Space around content */
+    margin-top: auto;               /* Push to bottom */
+    font-size: 0.8rem;              /* Smaller text */
+}
+
+/* Mobile-specific styles */
+/* This applies only to screens smaller than 480px (most phones) */
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.4rem;          /* Smaller title on small screens */
+    }
+    
+    section {
+        padding: 1rem;              /* Less padding on small screens */
+        margin-bottom: 0.5rem;      /* Less space between sections */
+    }
+    
+    main {
+        padding: 0.5rem;            /* Less padding on small screens */
+    }
+}
+
+/* Tablet styles */
+/* This applies to screens between 481px and 768px */
+@media (min-width: 481px) and (max-width: 768px) {
+    button {
+        width: auto;                /* Buttons don't need full width */
+        min-width: 200px;           /* But have minimum width */
+        display: block;             /* Block display */
+        margin: 0.5rem auto;        /* Center buttons */
+    }
+}

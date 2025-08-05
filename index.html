@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<!-- This tells the browser this is an HTML5 document -->
+
+<html lang="en">
+<!-- The <html> tag wraps everything. lang="en" means English language -->
+
+<head>
+    <!-- The <head> section contains information ABOUT the page, not visible content -->
+    
+    <meta charset="UTF-8">
+    <!-- This makes sure special characters display correctly -->
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- This makes the page work well on mobile phones - very important for your workers! -->
+    
+    <title>Berjaya WMS - Warehouse Management</title>
+    <!-- This appears in the browser tab -->
+    
+    <link rel="stylesheet" href="style.css">
+    <!-- This connects our CSS file to make things look nice -->
+</head>
+
+<body>
+    <!-- The <body> section contains what users actually see -->
+    
+    <header>
+        <!-- Header section - like the top of a document -->
+        <h1>Berjaya Warehouse Management</h1>
+        <!-- h1 = biggest heading -->
+        <p>Welcome to the inventory counting system</p>
+        <!-- p = paragraph -->
+    </header>
+    
+    <main>
+        <!-- Main content area -->
+        
+        <section id="login-section">
+            <!-- A section is like a chapter in a book -->
+            <!-- id="login-section" gives this section a unique name we can reference -->
+            
+            <h2>Please Login</h2>
+            <!-- h2 = second-level heading -->
+            
+            <button id="google-login-btn">Login with Google</button>
+            <!-- Button for Google login. id="google-login-btn" so JavaScript can find it -->
+        </section>
+        
+        <section id="inventory-section" style="display: none;">
+            <!-- This section is hidden at first (display: none) -->
+            <!-- It will show after user logs in -->
+            
+            <h2>Inventory Count</h2>
+            
+            <div id="user-info">
+                <!-- div = a container for grouping things -->
+                <p>Logged in as: <span id="user-name">Loading...</span></p>
+                <!-- span = inline container for small pieces of text -->
+            </div>
+            
+            <div id="inventory-list">
+                <!-- This is where we'll show the list of items to count -->
+                <p>Loading inventory items...</p>
+            </div>
+            
+            <button id="logout-btn">Logout</button>
+        </section>
+    </main>
+    
+    <footer>
+        <!-- Footer section - like the bottom of a document -->
+        <p>&copy; 2025 Berjaya Autotech - Warehouse Management System</p>
+        <!-- &copy; makes the © symbol -->
+    </footer>
+    
+    <!-- JavaScript files go at the bottom so they load after the HTML -->
+    <!-- This ensures all HTML elements exist before JavaScript tries to use them -->
+    
+    <!-- Firebase libraries from Google's servers -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Our Firebase configuration -->
+    <script src="firebase-config.js"></script>
+    
+    <!-- Our main application code (we'll create this next) -->
+    <script src="app.js"></script>
+</body>
+</html>
