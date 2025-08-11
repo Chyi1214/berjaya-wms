@@ -224,17 +224,40 @@ function updateItemCount(sku, amount, location) {
         return false;
     }
     
-    // For now, we'll SET the count (replace existing)
-    // Later we can change this to ADD or implement different logic
-    const oldValue = itemTable[sku][locationKey];
-    itemTable[sku][locationKey] = parseInt(amount);
-    console.log(`Updated ${sku} at ${locationKey}: ${oldValue} → ${itemTable[sku][locationKey]}`);
+    // Version 2.0.0: Update CHECKED table for worker counts
+    // Initialize SKU in checked table if not exists
+    if (!checkedItemTable[sku]) {
+        checkedItemTable[sku] = JSON.parse(JSON.stringify(itemTable[sku]));
+        // Reset all amounts to 0 for fresh counting
+        Object.keys(checkedItemTable[sku]).forEach(key => {
+            if (key.startsWith('amount_')) {
+                checkedItemTable[sku][key] = 0;
+            }
+        });
+        checkedItemTable[sku].total_amount = 0;
+    }
     
-    // Update total amount (sum of all locations)
+    // Update the checked table
+    const oldValue = checkedItemTable[sku][locationKey];
+    checkedItemTable[sku][locationKey] = parseInt(amount);
+    console.log(`Updated CHECKED table ${sku} at ${locationKey}: ${oldValue} → ${checkedItemTable[sku][locationKey]}`);
+    
+    // Update total in checked table
+    let total = checkedItemTable[sku].amount_logistics || 0;
+    for (let i = 1; i <= 30; i++) {
+        total += checkedItemTable[sku][`amount_production_zone_${i}`] || 0;
+    }
+    checkedItemTable[sku].total_amount = total;
+    
+    // Also update the legacy itemTable for backward compatibility
+    itemTable[sku][locationKey] = parseInt(amount);
     updateTotalAmount(sku);
     
     // Record transaction
     recordTransaction(sku, amount, location);
+    
+    // Save all changes
+    saveDataToLocalStorage();
     
     console.log(`Successfully updated ${sku} at ${location} to ${amount}`);
     return true;

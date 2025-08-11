@@ -136,14 +136,58 @@
         <section id="manager-section" style="display: none;">
             <!-- Manager view section -->
             
-            <h2 data-lang="manager_title">Manager - Item Table</h2>
+            <h2 data-lang="manager_title">Manager Dashboard</h2>
             
             <div id="manager-content">
-                <div id="item-table-display">
-                    <!-- Item table will be displayed here -->
+                <!-- Tab navigation -->
+                <div class="tab-navigation" style="margin-bottom: 20px;">
+                    <button class="tab-btn active" data-tab="overview">Overview</button>
+                    <button class="tab-btn" data-tab="yesterday">Yesterday Result</button>
+                    <button class="tab-btn" data-tab="checked">Checked Items</button>
+                    <button class="tab-btn" data-tab="transaction">Transaction Table</button>
+                    <button class="tab-btn" data-tab="logs">Transaction Logs</button>
                 </div>
                 
-                <button id="refresh-table-btn" data-lang="refresh_table">Refresh Table</button>
+                <!-- Tab content -->
+                <div id="tab-overview" class="tab-content active">
+                    <h3>System Overview</h3>
+                    <div id="overview-display">
+                        <!-- Overview comparison will be displayed here -->
+                    </div>
+                </div>
+                
+                <div id="tab-yesterday" class="tab-content" style="display: none;">
+                    <h3>Yesterday Result Table</h3>
+                    <div id="yesterday-table-display">
+                        <!-- Yesterday's final inventory -->
+                    </div>
+                </div>
+                
+                <div id="tab-checked" class="tab-content" style="display: none;">
+                    <h3>Checked Item Table</h3>
+                    <div id="checked-table-display">
+                        <!-- Today's counted items -->
+                    </div>
+                </div>
+                
+                <div id="tab-transaction" class="tab-content" style="display: none;">
+                    <h3>Transaction Item Table</h3>
+                    <div id="transaction-table-display">
+                        <!-- Expected based on transactions -->
+                    </div>
+                </div>
+                
+                <div id="tab-logs" class="tab-content" style="display: none;">
+                    <h3>Transaction Logs</h3>
+                    <div id="logs-display">
+                        <!-- Transaction history -->
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button id="refresh-dashboard-btn" data-lang="refresh_table">Refresh Dashboard</button>
+                    <button id="finalize-day-btn" style="background-color: #ff9800; margin-left: 10px;">Finalize Day</button>
+                </div>
             </div>
             
             <button id="back-to-roles-btn-3" class="back-btn" data-lang="go_back">Go Back</button>

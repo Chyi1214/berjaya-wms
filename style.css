@@ -240,6 +240,54 @@ footer {
     background-color: #e9ecef;      /* Highlight on hover */
 }
 
+/* Version 2.0.0: Tab navigation for manager dashboard */
+.tab-navigation {
+    display: flex;
+    gap: 5px;
+    border-bottom: 2px solid #ddd;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    background: #f0f0f0;
+    border: none;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.tab-btn:hover {
+    background: #e0e0e0;
+}
+
+.tab-btn.active {
+    background: #4169E1;
+    color: white;
+}
+
+.tab-content {
+    padding: 20px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 0 0 5px 5px;
+}
+
+/* Comparison table highlighting */
+.difference-highlight {
+    background-color: #ffeb3b !important;
+    font-weight: bold;
+}
+
+.missing-item {
+    background-color: #ffcdd2 !important;
+}
+
+.extra-item {
+    background-color: #c8e6c9 !important;
+}
+
 /* Zone selection styles */
 #zone-selection {
     text-align: center;             /* Center zone selection */

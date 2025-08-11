@@ -303,20 +303,346 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Manager view setup
+    // Manager view setup - Version 2.0.0 Complete Dashboard
     function setupManagerView() {
-        displayItemTable();
+        setupTabNavigation();
+        refreshManagerDashboard();
         
-        const refreshBtn = document.getElementById('refresh-table-btn');
+        const refreshBtn = document.getElementById('refresh-dashboard-btn');
         refreshBtn.addEventListener('click', function() {
-            console.log('Refreshing item table...');
-            displayItemTable();
+            console.log('Refreshing dashboard...');
+            refreshManagerDashboard();
+        });
+        
+        const finalizeBtn = document.getElementById('finalize-day-btn');
+        finalizeBtn.addEventListener('click', function() {
+            if (confirm('Finalize day? This will set today\'s results as tomorrow\'s starting point.')) {
+                finalizeDay();
+            }
         });
     }
     
+    // Tab navigation setup
+    function setupTabNavigation() {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const targetTab = this.getAttribute('data-tab');
+                
+                // Update active button
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Show corresponding content
+                tabContents.forEach(content => {
+                    if (content.id === `tab-${targetTab}`) {
+                        content.style.display = 'block';
+                    } else {
+                        content.style.display = 'none';
+                    }
+                });
+                
+                // Refresh the specific tab content
+                refreshTabContent(targetTab);
+            });
+        });
+    }
+    
+    // Refresh specific tab content
+    function refreshTabContent(tab) {
+        switch(tab) {
+            case 'overview':
+                displayOverview();
+                break;
+            case 'yesterday':
+                displayYesterdayTable();
+                break;
+            case 'checked':
+                displayCheckedTable();
+                break;
+            case 'transaction':
+                displayTransactionTable();
+                break;
+            case 'logs':
+                displayTransactionLogs();
+                break;
+        }
+    }
+    
+    // Refresh entire dashboard
+    function refreshManagerDashboard() {
+        // Load fresh data
+        loadDataFromLocalStorage();
+        
+        // Refresh active tab
+        const activeTab = document.querySelector('.tab-btn.active');
+        if (activeTab) {
+            const tabName = activeTab.getAttribute('data-tab');
+            refreshTabContent(tabName);
+        }
+    }
+    
+    // Display overview with comparison
+    function displayOverview() {
+        const display = document.getElementById('overview-display');
+        
+        // Load all three tables
+        loadDataFromLocalStorage();
+        
+        let html = `
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <h4>Checked vs Transaction Comparison</h4>
+                    ${generateComparisonTable()}
+                </div>
+                <div>
+                    <h4>Summary Statistics</h4>
+                    ${generateSummaryStats()}
+                </div>
+            </div>
+        `;
+        
+        display.innerHTML = html;
+    }
+    
+    // Generate comparison table
+    function generateComparisonTable() {
+        const allSKUs = new Set([
+            ...Object.keys(checkedItemTable),
+            ...Object.keys(transactionItemTable)
+        ]);
+        
+        let html = '<table class="item-table"><thead><tr><th>SKU</th><th>Checked</th><th>Expected</th><th>Difference</th></tr></thead><tbody>';
+        
+        allSKUs.forEach(sku => {
+            const checked = checkedItemTable[sku];
+            const expected = transactionItemTable[sku];
+            
+            if (!checked && expected) {
+                // Not counted yet
+                html += `<tr class="missing-item">
+                    <td>${sku}</td>
+                    <td>Not counted</td>
+                    <td>${expected.total_amount || 0}</td>
+                    <td>Missing count</td>
+                </tr>`;
+            } else if (checked && !expected) {
+                // Extra item counted
+                html += `<tr class="extra-item">
+                    <td>${sku}</td>
+                    <td>${checked.total_amount || 0}</td>
+                    <td>No record</td>
+                    <td>Unexpected item</td>
+                </tr>`;
+            } else if (checked && expected) {
+                const checkedTotal = checked.total_amount || 0;
+                const expectedTotal = expected.total_amount || 0;
+                const diff = checkedTotal - expectedTotal;
+                
+                if (diff !== 0) {
+                    html += `<tr class="difference-highlight">
+                        <td>${sku}</td>
+                        <td>${checkedTotal}</td>
+                        <td>${expectedTotal}</td>
+                        <td>${diff > 0 ? '+' : ''}${diff}</td>
+                    </tr>`;
+                } else {
+                    html += `<tr>
+                        <td>${sku}</td>
+                        <td>${checkedTotal}</td>
+                        <td>${expectedTotal}</td>
+                        <td>✓ Match</td>
+                    </tr>`;
+                }
+            }
+        });
+        
+        html += '</tbody></table>';
+        return html;
+    }
+    
+    // Generate summary statistics
+    function generateSummaryStats() {
+        const pendingCount = pendingTransactions.filter(t => t.status === 'pending').length;
+        const completedToday = transactionLog.filter(t => {
+            const today = new Date().toDateString();
+            return new Date(t.created_at).toDateString() === today;
+        }).length;
+        
+        return `
+            <div style="padding: 10px; background: #f5f5f5; border-radius: 5px;">
+                <p><strong>Pending Transactions:</strong> ${pendingCount}</p>
+                <p><strong>Completed Today:</strong> ${completedToday}</p>
+                <p><strong>Items Checked:</strong> ${Object.keys(checkedItemTable).length}</p>
+                <p><strong>Expected Items:</strong> ${Object.keys(transactionItemTable).length}</p>
+            </div>
+        `;
+    }
+    
+    // Display yesterday's result table
+    function displayYesterdayTable() {
+        const display = document.getElementById('yesterday-table-display');
+        display.innerHTML = generateTableHTML(yesterdayResultTable, 'Yesterday\'s Final Inventory');
+    }
+    
+    // Display checked items table
+    function displayCheckedTable() {
+        const display = document.getElementById('checked-table-display');
+        display.innerHTML = generateTableHTML(checkedItemTable, 'Today\'s Counted Items');
+    }
+    
+    // Display transaction table
+    function displayTransactionTable() {
+        const display = document.getElementById('transaction-table-display');
+        display.innerHTML = generateTableHTML(transactionItemTable, 'Expected Based on Transactions');
+    }
+    
+    // Generic table generator
+    function generateTableHTML(tableData, title) {
+        if (!tableData || Object.keys(tableData).length === 0) {
+            return `<p>No data available for ${title}</p>`;
+        }
+        
+        let html = `
+            <table class="item-table">
+                <thead>
+                    <tr>
+                        <th>SKU</th>
+                        <th>Name</th>
+                        <th>Logistics</th>
+                        <th>Production</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        Object.values(tableData).forEach(item => {
+            let productionTotal = 0;
+            for (let i = 1; i <= 30; i++) {
+                productionTotal += item[`amount_production_zone_${i}`] || 0;
+            }
+            
+            html += `
+                <tr>
+                    <td><strong>${item.sku}</strong></td>
+                    <td>${item.name}</td>
+                    <td>${item.amount_logistics || 0}</td>
+                    <td>${productionTotal}</td>
+                    <td><strong>${item.total_amount || 0}</strong></td>
+                </tr>
+            `;
+        });
+        
+        html += '</tbody></table>';
+        return html;
+    }
+    
+    // Display transaction logs
+    function displayTransactionLogs() {
+        const display = document.getElementById('logs-display');
+        
+        if (transactionLog.length === 0) {
+            display.innerHTML = '<p>No transactions recorded yet.</p>';
+            return;
+        }
+        
+        let html = `
+            <table class="item-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Time</th>
+                        <th>SKU</th>
+                        <th>Amount</th>
+                        <th>From → To</th>
+                        <th>Status</th>
+                        <th>By</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        
+        // Show recent transactions first
+        const sortedLogs = [...transactionLog].reverse();
+        
+        sortedLogs.forEach(log => {
+            const time = new Date(log.created_at || log.timestamp).toLocaleString();
+            html += `
+                <tr>
+                    <td>${log.id || 'N/A'}</td>
+                    <td>${time}</td>
+                    <td>${log.sku}</td>
+                    <td>${log.amount}</td>
+                    <td>${getLocationDisplayName(log.from_location || log.location)} → ${getLocationDisplayName(log.to_location || 'N/A')}</td>
+                    <td>${log.status || 'completed'}</td>
+                    <td>${log.created_by || log.counted_by}</td>
+                </tr>
+            `;
+        });
+        
+        html += '</tbody></table>';
+        display.innerHTML = html;
+    }
+    
+    // Finalize day function
+    function finalizeDay() {
+        // Check if there are discrepancies
+        const hasDiscrepancies = checkForDiscrepancies();
+        
+        if (hasDiscrepancies) {
+            alert('Warning: There are discrepancies between Checked and Transaction tables. Please investigate before finalizing.');
+            return;
+        }
+        
+        // Set today's transaction table as tomorrow's yesterday table
+        yesterdayResultTable = JSON.parse(JSON.stringify(transactionItemTable));
+        
+        // Reset checked table for new day
+        checkedItemTable = {};
+        
+        // Clear completed transactions
+        transactionLog = transactionLog.filter(t => {
+            const today = new Date().toDateString();
+            return new Date(t.created_at || t.timestamp).toDateString() === today;
+        });
+        
+        // Save everything
+        saveDataToLocalStorage();
+        
+        alert('Day finalized successfully! Today\'s results are now set as tomorrow\'s starting point.');
+        refreshManagerDashboard();
+    }
+    
+    // Check for discrepancies
+    function checkForDiscrepancies() {
+        const allSKUs = new Set([
+            ...Object.keys(checkedItemTable),
+            ...Object.keys(transactionItemTable)
+        ]);
+        
+        for (let sku of allSKUs) {
+            const checked = checkedItemTable[sku];
+            const expected = transactionItemTable[sku];
+            
+            if (!checked || !expected) {
+                return true; // Missing data
+            }
+            
+            if (checked.total_amount !== expected.total_amount) {
+                return true; // Mismatch
+            }
+        }
+        
+        return false;
+    }
+    
+    // Keep old displayItemTable for compatibility
     function displayItemTable() {
-        const tableDisplay = document.getElementById('item-table-display');
-        const itemTable = getItemTable();
+        // Redirect to transaction table display
+        displayTransactionTable();
         
         let tableHTML = `
             <h3 data-lang="current_inventory_status">${languageManager.getText('current_inventory_status') || 'Current Inventory Status'}</h3>
