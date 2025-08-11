@@ -25,11 +25,30 @@
     
     <header>
         <!-- Header section - like the top of a document -->
-        <h1>Berjaya Warehouse Management</h1>
+        <button id="menu-toggle" class="menu-toggle" aria-label="Open menu">
+            ☰
+        </button>
+        <h1 data-lang="header_title">Berjaya Warehouse Management</h1>
         <!-- h1 = biggest heading -->
-        <p>Welcome to the inventory counting system</p>
+        <p data-lang="header_subtitle">Welcome to the inventory counting system</p>
         <!-- p = paragraph -->
     </header>
+    
+    <!-- Side menu -->
+    <nav id="side-menu" class="side-menu">
+        <div class="menu-header">
+            <button id="menu-close" class="menu-close" aria-label="Close menu">×</button>
+        </div>
+        <div class="menu-content">
+            <h3 data-lang="menu_language">Language</h3>
+            <div id="language-options" class="language-options">
+                <!-- Language options will be populated by JavaScript -->
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Menu overlay -->
+    <div id="menu-overlay" class="menu-overlay"></div>
     
     <main>
         <!-- Main content area -->
@@ -38,52 +57,107 @@
             <!-- A section is like a chapter in a book -->
             <!-- id="login-section" gives this section a unique name we can reference -->
             
-            <h2>Please Login</h2>
+            <h2 data-lang="login_title">Please Login</h2>
             <!-- h2 = second-level heading -->
             
-            <button id="google-login-btn">Login with Google</button>
+            <button id="google-login-btn" data-lang="login_button">Login with Google</button>
             <!-- Button for Google login. id="google-login-btn" so JavaScript can find it -->
         </section>
         
-        <section id="inventory-section" style="display: none;">
-            <!-- This section is hidden at first (display: none) -->
-            <!-- It will show after user logs in -->
+        <section id="role-selection-section" style="display: none;">
+            <!-- Role selection screen - shown after login -->
             
-            <h2>Inventory Count</h2>
+            <h2 data-lang="role_selection_title">Select Your Role</h2>
             
             <div id="user-info">
-                <!-- div = a container for grouping things -->
-                <p>Logged in as: <span id="user-name">Loading...</span></p>
-                <!-- span = inline container for small pieces of text -->
+                <p><span data-lang="logged_in_as">Logged in as:</span> <span id="user-name">Loading...</span></p>
             </div>
             
-            <div id="inventory-list">
-                <!-- This is where we'll show the list of items to count -->
-                <p>Loading inventory items...</p>
+            <div id="role-buttons">
+                <button id="logistics-btn" class="role-btn" data-lang="role_logistics">Logistics</button>
+                <button id="production-btn" class="role-btn" data-lang="role_production">Production</button>
+                <button id="manager-btn" class="role-btn" data-lang="role_manager">Manager</button>
             </div>
             
-            <button id="logout-btn">Logout</button>
+            <button id="logout-btn" data-lang="logout_button">Logout</button>
+        </section>
+
+        <section id="logistics-section" style="display: none;">
+            <!-- Logistics workflow section -->
+            
+            <h2 data-lang="logistics_title">Logistics - Inventory Count</h2>
+            
+            <div id="logistics-content">
+                <button id="check-inventory-logistics-btn" data-lang="check_inventory">Check Inventory</button>
+                <div id="logistics-counting-form" style="display: none;">
+                    <!-- Counting form will be inserted here -->
+                </div>
+            </div>
+            
+            <button id="back-to-roles-btn-1" class="back-btn" data-lang="go_back">Go Back</button>
+        </section>
+
+        <section id="production-section" style="display: none;">
+            <!-- Production workflow section -->
+            
+            <h2 data-lang="production_title">Production - Select Zone</h2>
+            
+            <div id="production-content">
+                <div id="zone-selection">
+                    <label for="zone-input" data-lang="zone_label">Enter your production zone (1-30):</label>
+                    <input type="number" id="zone-input" min="1" max="30" data-lang-placeholder="zone_placeholder">
+                    <button id="select-zone-btn" data-lang="select_zone">Select Zone</button>
+                </div>
+                
+                <div id="production-counting" style="display: none;">
+                    <!-- Will show zone-specific counting interface -->
+                </div>
+            </div>
+            
+            <button id="back-to-roles-btn-2" class="back-btn" data-lang="go_back">Go Back</button>
+        </section>
+
+        <section id="manager-section" style="display: none;">
+            <!-- Manager view section -->
+            
+            <h2 data-lang="manager_title">Manager - Item Table</h2>
+            
+            <div id="manager-content">
+                <div id="item-table-display">
+                    <!-- Item table will be displayed here -->
+                </div>
+                
+                <button id="refresh-table-btn" data-lang="refresh_table">Refresh Table</button>
+            </div>
+            
+            <button id="back-to-roles-btn-3" class="back-btn" data-lang="go_back">Go Back</button>
         </section>
     </main>
     
     <footer>
         <!-- Footer section - like the bottom of a document -->
-        <p>&copy; 2025 Berjaya Autotech - Warehouse Management System</p>
+        <p data-lang="footer_text">&copy; 2025 Berjaya Autotech - Warehouse Management System</p>
         <!-- &copy; makes the © symbol -->
     </footer>
     
     <!-- JavaScript files go at the bottom so they load after the HTML -->
     <!-- This ensures all HTML elements exist before JavaScript tries to use them -->
     
-    <!-- Firebase libraries from Google's servers -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <!-- Local data simulation (for development) -->
+    <script src="local-data.js"></script>
+    
+    <!-- Firebase libraries from Google's servers (commented out for local development) -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script> -->
     
-    <!-- Our Firebase configuration -->
-    <script src="firebase-config.js"></script>
+    <!-- Our Firebase configuration (commented out for local development) -->
+    <!-- <script src="firebase-config.js"></script> -->
     
-    <!-- Our main application code (we'll create this next) -->
-    <script src="app.js"></script>
+    <!-- Language support -->
+    <script src="languages.js"></script>
+    
+    <!-- Our main application code (local development version) -->
+    <script src="app-local.js"></script>
 </body>
 </html>

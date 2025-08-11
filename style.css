@@ -26,6 +26,7 @@ header {
     text-align: center;             /* Center the text */
     padding: 1rem;                  /* Space around content (1rem = 16px) */
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);  /* Subtle shadow underneath */
+    position: relative;             /* For positioning menu button */
 }
 
 header h1 {
@@ -143,6 +144,123 @@ footer {
     }
 }
 
+/* Role selection buttons */
+.role-btn {
+    background-color: #28a745;      /* Green color for role buttons */
+    margin: 0.5rem 0;               /* Space between role buttons */
+}
+
+.role-btn:hover {
+    background-color: #218838;      /* Darker green on hover */
+}
+
+/* Back buttons */
+.back-btn {
+    background-color: #6c757d;      /* Gray color for back buttons */
+    margin-top: 2rem;               /* Extra space above back buttons */
+}
+
+.back-btn:hover {
+    background-color: #5a6268;      /* Darker gray on hover */
+}
+
+/* Counting form styles */
+.counting-form {
+    background-color: #f8f9fa;      /* Light background */
+    padding: 1.5rem;                /* Space inside */
+    border-radius: 8px;             /* Rounded corners */
+    margin: 1rem 0;                 /* Space around */
+}
+
+.form-group {
+    margin-bottom: 1rem;            /* Space between form elements */
+}
+
+.form-group label {
+    display: block;                 /* Stack labels above inputs */
+    font-weight: bold;              /* Make labels bold */
+    margin-bottom: 0.5rem;          /* Space below labels */
+    color: #333;                    /* Dark text */
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;                    /* Full width inputs */
+    padding: 12px;                  /* Space inside inputs */
+    border: 2px solid #ddd;         /* Gray border */
+    border-radius: 6px;             /* Rounded corners */
+    font-size: 1rem;                /* Readable text size */
+    background-color: white;        /* White background */
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;                  /* Remove default outline */
+    border-color: #4285f4;          /* Blue border when focused */
+    box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1); /* Subtle glow */
+}
+
+.form-actions {
+    display: flex;                  /* Side-by-side buttons */
+    gap: 1rem;                      /* Space between buttons */
+    margin-top: 1.5rem;             /* Space above buttons */
+}
+
+.form-actions button {
+    flex: 1;                        /* Equal width buttons */
+}
+
+/* Manager table styles */
+.item-table {
+    width: 100%;                    /* Full width table */
+    border-collapse: collapse;      /* Remove gaps between cells */
+    margin: 1rem 0;                 /* Space around table */
+    background-color: white;        /* White background */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
+}
+
+.item-table th,
+.item-table td {
+    padding: 12px;                  /* Space inside cells */
+    text-align: left;               /* Left-align text */
+    border-bottom: 1px solid #ddd;  /* Line between rows */
+}
+
+.item-table th {
+    background-color: #2c5aa0;      /* Blue header background */
+    color: white;                   /* White header text */
+    font-weight: bold;              /* Bold header text */
+}
+
+.item-table tr:nth-child(even) {
+    background-color: #f8f9fa;      /* Alternate row colors */
+}
+
+.item-table tr:hover {
+    background-color: #e9ecef;      /* Highlight on hover */
+}
+
+/* Zone selection styles */
+#zone-selection {
+    text-align: center;             /* Center zone selection */
+    padding: 2rem;                  /* Space around */
+}
+
+#zone-input {
+    max-width: 200px;               /* Limit width of zone input */
+    margin: 1rem auto;              /* Center and space around */
+    display: block;                 /* Block display for centering */
+}
+
+/* Status messages */
+#count-status p {
+    padding: 1rem;                  /* Space inside status messages */
+    border-radius: 6px;             /* Rounded corners */
+    margin-top: 1rem;               /* Space above */
+    text-align: center;             /* Center text */
+    font-weight: bold;              /* Bold text */
+}
+
 /* Tablet styles */
 /* This applies to screens between 481px and 768px */
 @media (min-width: 481px) and (max-width: 768px) {
@@ -151,5 +269,193 @@ footer {
         min-width: 200px;           /* But have minimum width */
         display: block;             /* Block display */
         margin: 0.5rem auto;        /* Center buttons */
+    }
+    
+    .form-actions {
+        flex-direction: column;     /* Stack form buttons vertically on tablets */
+    }
+    
+    .form-actions button {
+        width: 100%;                /* Full width form buttons on tablets */
+    }
+}
+
+/* Mobile-specific styles for new elements */
+@media (max-width: 480px) {
+    .item-table {
+        font-size: 0.8rem;          /* Smaller text on mobile */
+    }
+    
+    .item-table th,
+    .item-table td {
+        padding: 8px;               /* Less padding on mobile */
+    }
+    
+    .counting-form {
+        padding: 1rem;              /* Less padding on mobile */
+    }
+}
+
+/* Menu button styles */
+.menu-toggle {
+    position: absolute;             /* Position relative to header */
+    left: 1rem;                     /* Distance from left edge */
+    top: 50%;                       /* Center vertically */
+    transform: translateY(-50%);    /* Adjust for perfect centering */
+    background: none;               /* No background */
+    border: none;                   /* No border */
+    color: white;                   /* White text */
+    font-size: 1.5rem;              /* Large icon */
+    cursor: pointer;                /* Hand cursor */
+    padding: 0.5rem;                /* Clickable area */
+    border-radius: 4px;             /* Rounded corners */
+    transition: background-color 0.3s; /* Smooth hover effect */
+    width: auto;                    /* Override button width */
+    min-height: auto;               /* Override button min-height */
+    margin: 0;                      /* Remove button margin */
+}
+
+.menu-toggle:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Light hover effect */
+}
+
+.menu-toggle:active {
+    transform: translateY(-50%) translateY(1px); /* Slight press effect */
+}
+
+/* Side menu styles */
+.side-menu {
+    position: fixed;                /* Fixed positioning */
+    top: 0;                         /* Start from top */
+    left: -300px;                   /* Hidden by default */
+    width: 280px;                   /* Menu width */
+    height: 100vh;                  /* Full height */
+    background-color: white;        /* White background */
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1); /* Shadow on right side */
+    transition: left 0.3s ease;     /* Smooth slide animation */
+    z-index: 1000;                  /* Above other content */
+    overflow-y: auto;               /* Scroll if content is too long */
+}
+
+.side-menu.open {
+    left: 0;                        /* Show menu */
+}
+
+.menu-header {
+    background-color: #2c5aa0;      /* Match header color */
+    color: white;                   /* White text */
+    padding: 1rem;                  /* Space around content */
+    display: flex;                  /* Flexbox layout */
+    justify-content: flex-end;      /* Close button on right */
+}
+
+.menu-close {
+    background: none;               /* No background */
+    border: none;                   /* No border */
+    color: white;                   /* White text */
+    font-size: 2rem;                /* Large close icon */
+    cursor: pointer;                /* Hand cursor */
+    padding: 0.25rem 0.5rem;        /* Clickable area */
+    border-radius: 4px;             /* Rounded corners */
+    transition: background-color 0.3s; /* Hover effect */
+    width: auto;                    /* Override button width */
+    min-height: auto;               /* Override button min-height */
+    margin: 0;                      /* Remove button margin */
+}
+
+.menu-close:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Light hover effect */
+}
+
+.menu-content {
+    padding: 2rem 1rem;             /* Space around content */
+}
+
+.menu-content h3 {
+    color: #2c5aa0;                 /* Match header color */
+    margin-bottom: 1rem;            /* Space below heading */
+    font-size: 1.2rem;              /* Larger heading */
+}
+
+/* Language options styles */
+.language-options {
+    display: flex;                  /* Flexbox layout */
+    flex-direction: column;         /* Stack vertically */
+    gap: 0.5rem;                    /* Space between options */
+}
+
+.language-option {
+    display: flex;                  /* Flexbox layout */
+    align-items: center;            /* Center vertically */
+    padding: 0.75rem 1rem;          /* Space inside option */
+    border: 2px solid #ddd;         /* Light border */
+    border-radius: 8px;             /* Rounded corners */
+    cursor: pointer;                /* Hand cursor */
+    transition: all 0.3s ease;      /* Smooth transitions */
+    background-color: white;        /* White background */
+    width: 100%;                    /* Full width */
+    margin: 0;                      /* No margin */
+    min-height: auto;               /* Override button min-height */
+    text-align: left;               /* Left align text */
+}
+
+.language-option:hover {
+    border-color: #4285f4;          /* Blue border on hover */
+    background-color: #f8f9ff;      /* Light blue background */
+    transform: none;                /* No transform on hover */
+}
+
+.language-option.active {
+    border-color: #4285f4;          /* Blue border for active */
+    background-color: #e3f2fd;      /* Light blue background */
+    font-weight: bold;              /* Bold text */
+}
+
+.language-emoji {
+    font-size: 1.5rem;              /* Large emoji */
+    margin-right: 0.75rem;          /* Space after emoji */
+}
+
+.language-name {
+    font-size: 1rem;                /* Normal text size */
+    color: #333;                    /* Dark text */
+}
+
+/* Menu overlay */
+.menu-overlay {
+    position: fixed;                /* Fixed positioning */
+    top: 0;                         /* Cover full screen */
+    left: 0;
+    width: 100vw;                   /* Full width */
+    height: 100vh;                  /* Full height */
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    z-index: 999;                   /* Below menu but above content */
+    opacity: 0;                     /* Hidden by default */
+    visibility: hidden;             /* Not clickable when hidden */
+    transition: opacity 0.3s ease, visibility 0.3s ease; /* Smooth fade */
+}
+
+.menu-overlay.show {
+    opacity: 1;                     /* Visible */
+    visibility: visible;            /* Clickable */
+}
+
+/* Mobile-specific menu styles */
+@media (max-width: 480px) {
+    .side-menu {
+        width: 260px;               /* Slightly narrower on mobile */
+    }
+    
+    .menu-toggle {
+        left: 0.5rem;               /* Closer to edge on mobile */
+        font-size: 1.3rem;          /* Slightly smaller on mobile */
+    }
+    
+    .language-option {
+        padding: 1rem 0.75rem;      /* More padding for touch */
+    }
+    
+    .language-emoji {
+        font-size: 1.3rem;          /* Slightly smaller emoji on mobile */
     }
 }
