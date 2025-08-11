@@ -318,15 +318,23 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         const resetBtn = document.getElementById('reset-data-btn');
-        resetBtn.addEventListener('click', function() {
-            if (confirm('⚠️ Reset all data? This will:\n• Clear all transactions\n• Reset checked items\n• Set fresh starting point\n\nThis cannot be undone!')) {
+        resetBtn.addEventListener('click', async function() {
+            const confirmed = await modal.confirm(
+                '⚠️ Reset All Data?',
+                'This will:\n• Clear all transactions\n• Reset checked items\n• Set fresh starting point\n\nThis cannot be undone!'
+            );
+            if (confirmed) {
                 resetAllData();
             }
         });
         
         const finalizeBtn = document.getElementById('finalize-day-btn');
-        finalizeBtn.addEventListener('click', function() {
-            if (confirm('Finalize day? This will set today\'s results as tomorrow\'s starting point.')) {
+        finalizeBtn.addEventListener('click', async function() {
+            const confirmed = await modal.confirm(
+                '🎯 Finalize Day?',
+                'This will set today\'s results as tomorrow\'s starting point.\n\nAre you sure you want to finalize the day?'
+            );
+            if (confirmed) {
                 finalizeDay();
             }
         });
@@ -382,7 +390,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Reset all data function
-    function resetAllData() {
+    async function resetAllData() {
         console.log('Resetting all data to synchronized state...');
         
         // Load current itemTable as the baseline
@@ -409,7 +417,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Refresh the current view
         refreshManagerDashboard();
         
-        alert('✅ Data reset complete!\n\n• All tables now synchronized\n• Transactions cleared\n• Ready for fresh testing');
+        await modal.alert(
+            '✅ Data Reset Complete!',
+            '• All tables now synchronized\n• Transactions cleared\n• Ready for fresh testing'
+        );
     }
     
     // Display overview with comparison
@@ -949,21 +960,29 @@ function showTransactionForm(container, fromLocation) {
 }
 
 // Handle incoming transaction confirmation
-window.confirmIncomingTransaction = function(transactionId) {
+window.confirmIncomingTransaction = async function(transactionId) {
     const transaction = pendingTransactions.find(t => t.id === transactionId);
     if (!transaction) {
-        alert('Transaction not found');
+        await modal.alert('Error', 'Transaction not found');
         return;
     }
     
     // Show OTP input dialog
-    const otp = prompt(`Enter OTP for transaction ${transactionId}:`);
+    const otp = await modal.prompt(
+        'Confirm Transaction', 
+        `Enter OTP for transaction ${transactionId}:`,
+        'Enter 4-digit OTP'
+    );
+    
     if (!otp) return;
     
     const result = confirmTransaction(transactionId, otp);
     
     if (result.success) {
-        alert(`✓ Transaction confirmed!\nSKU: ${transaction.sku}\nAmount: ${transaction.amount}`);
+        await modal.alert(
+            '✅ Transaction Confirmed!',
+            `SKU: ${transaction.sku}\nAmount: ${transaction.amount}\nTransaction completed successfully.`
+        );
         // Refresh the form
         const currentLocation = currentRole === 'logistics' ? 'logistics' : `production_zone_${selectedZone}`;
         const container = currentRole === 'logistics' ? 
@@ -971,7 +990,7 @@ window.confirmIncomingTransaction = function(transactionId) {
             document.getElementById('production-transaction-form');
         showTransactionForm(container, currentLocation);
     } else {
-        alert(`✗ Error: ${result.message}`);
+        await modal.alert('❌ Transaction Failed', result.message);
     }
 };
 
@@ -1046,20 +1065,23 @@ function setupTransactionDropdown(availableSKUs) {
 }
 
 // Create outgoing transaction
-window.createOutgoingTransaction = function(fromLocation) {
+window.createOutgoingTransaction = async function(fromLocation) {
     const sku = document.getElementById('trans-selected-sku').value;
     const amount = document.getElementById('trans-amount').value;
     const destination = document.getElementById('trans-destination').value;
     
     if (!sku || !amount || !destination) {
-        alert('Please fill all fields');
+        await modal.alert('Missing Information', 'Please fill all fields before creating transaction.');
         return;
     }
     
     const transaction = createTransaction(sku, amount, fromLocation, destination);
     
     // Show success with OTP
-    alert(`✓ Transaction created!\n\nID: ${transaction.id}\nOTP: ${transaction.otp}\n\nShare this OTP with the receiver`);
+    await modal.alert(
+        '🚀 Transaction Created!',
+        `Transaction ID: ${transaction.id}\nOTP: ${transaction.otp}\n\nShare this OTP with the receiver to confirm the transaction.`
+    );
     
     // Clear form
     document.getElementById('trans-sku-search').value = '';
@@ -1185,3 +1207,131 @@ function setupSearchableDropdown(availableSKUs) {
         });
     });
 }
+
+// Custom Modal System (replaces alert/prompt)
+class CustomModal {
+    constructor() {
+        this.overlay = document.getElementById('modal-overlay');
+        this.title = document.getElementById('modal-title');
+        this.message = document.getElementById('modal-message');
+        this.input = document.getElementById('modal-input');
+        this.inputContainer = document.getElementById('modal-input-container');
+        this.cancelBtn = document.getElementById('modal-cancel');
+        this.confirmBtn = document.getElementById('modal-confirm');
+        this.closeBtn = document.getElementById('modal-close');
+        
+        this.setupEventListeners();
+    }
+    
+    setupEventListeners() {
+        // Close modal events
+        this.closeBtn.addEventListener('click', () => this.close());
+        this.cancelBtn.addEventListener('click', () => this.close());
+        
+        // Close on overlay click
+        this.overlay.addEventListener('click', (e) => {
+            if (e.target === this.overlay) {
+                this.close();
+            }
+        });
+        
+        // Close on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.overlay.style.display === 'flex') {
+                this.close();
+            }
+        });
+    }
+    
+    show(config) {
+        return new Promise((resolve) => {
+            // Set content
+            this.title.textContent = config.title || 'Confirmation';
+            this.message.textContent = config.message || '';
+            
+            // Handle input field
+            if (config.showInput) {
+                this.inputContainer.style.display = 'block';
+                this.input.value = '';
+                this.input.placeholder = config.inputPlaceholder || 'Enter here...';
+                this.input.type = config.inputType || 'text';
+            } else {
+                this.inputContainer.style.display = 'none';
+            }
+            
+            // Handle buttons
+            this.cancelBtn.style.display = config.showCancel !== false ? 'block' : 'none';
+            this.confirmBtn.textContent = config.confirmText || 'OK';
+            this.cancelBtn.textContent = config.cancelText || 'Cancel';
+            
+            // Set up confirm handler
+            const handleConfirm = () => {
+                const result = config.showInput ? this.input.value : true;
+                this.close();
+                resolve(result);
+            };
+            
+            const handleCancel = () => {
+                this.close();
+                resolve(null);
+            };
+            
+            // Remove old listeners and add new ones
+            this.confirmBtn.replaceWith(this.confirmBtn.cloneNode(true));
+            this.confirmBtn = document.getElementById('modal-confirm');
+            this.confirmBtn.addEventListener('click', handleConfirm);
+            
+            // Show modal
+            this.overlay.style.display = 'flex';
+            
+            // Focus input if present
+            if (config.showInput) {
+                setTimeout(() => this.input.focus(), 100);
+                
+                // Allow Enter to confirm
+                this.input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleConfirm();
+                    }
+                });
+            }
+        });
+    }
+    
+    close() {
+        this.overlay.style.display = 'none';
+    }
+    
+    // Convenience methods
+    alert(title, message) {
+        return this.show({
+            title,
+            message,
+            showCancel: false,
+            confirmText: 'OK'
+        });
+    }
+    
+    confirm(title, message) {
+        return this.show({
+            title,
+            message,
+            confirmText: 'Yes',
+            cancelText: 'No'
+        });
+    }
+    
+    prompt(title, message, placeholder = '') {
+        return this.show({
+            title,
+            message,
+            showInput: true,
+            inputPlaceholder: placeholder,
+            confirmText: 'Submit'
+        });
+    }
+}
+
+// Initialize modal system
+const modal = new CustomModal();
