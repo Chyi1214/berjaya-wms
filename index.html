@@ -139,54 +139,25 @@
             <h2 data-lang="manager_title">Manager Dashboard</h2>
             
             <div id="manager-content">
-                <!-- Tab navigation -->
-                <div class="tab-navigation" style="margin-bottom: 20px;">
-                    <button class="tab-btn active" data-tab="overview">Overview</button>
-                    <button class="tab-btn" data-tab="yesterday">Yesterday Result</button>
-                    <button class="tab-btn" data-tab="checked">Checked Items</button>
-                    <button class="tab-btn" data-tab="transaction">Transaction Table</button>
-                    <button class="tab-btn" data-tab="logs">Transaction Logs</button>
+                <!-- Controls -->
+                <div class="manager-controls" style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <label for="table-selector">View Table:</label>
+                    <select id="table-selector" style="padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                        <option value="overview">📊 Overview</option>
+                        <option value="yesterday">📋 Yesterday Result</option>
+                        <option value="checked">✅ Checked Items</option>
+                        <option value="transaction">🔄 Transaction Table</option>
+                        <option value="logs">📝 Transaction Logs</option>
+                    </select>
+                    
+                    <button id="refresh-dashboard-btn" data-lang="refresh_table" style="padding: 8px 12px;">🔄 Refresh</button>
+                    <button id="reset-data-btn" style="background-color: #f44336; color: white; padding: 8px 12px;">🗑️ Reset Data</button>
+                    <button id="finalize-day-btn" style="background-color: #ff9800; color: white; padding: 8px 12px;">🎯 Finalize Day</button>
                 </div>
                 
-                <!-- Tab content -->
-                <div id="tab-overview" class="tab-content active">
-                    <h3>System Overview</h3>
-                    <div id="overview-display">
-                        <!-- Overview comparison will be displayed here -->
-                    </div>
-                </div>
-                
-                <div id="tab-yesterday" class="tab-content" style="display: none;">
-                    <h3>Yesterday Result Table</h3>
-                    <div id="yesterday-table-display">
-                        <!-- Yesterday's final inventory -->
-                    </div>
-                </div>
-                
-                <div id="tab-checked" class="tab-content" style="display: none;">
-                    <h3>Checked Item Table</h3>
-                    <div id="checked-table-display">
-                        <!-- Today's counted items -->
-                    </div>
-                </div>
-                
-                <div id="tab-transaction" class="tab-content" style="display: none;">
-                    <h3>Transaction Item Table</h3>
-                    <div id="transaction-table-display">
-                        <!-- Expected based on transactions -->
-                    </div>
-                </div>
-                
-                <div id="tab-logs" class="tab-content" style="display: none;">
-                    <h3>Transaction Logs</h3>
-                    <div id="logs-display">
-                        <!-- Transaction history -->
-                    </div>
-                </div>
-                
-                <div style="margin-top: 20px;">
-                    <button id="refresh-dashboard-btn" data-lang="refresh_table">Refresh Dashboard</button>
-                    <button id="finalize-day-btn" style="background-color: #ff9800; margin-left: 10px;">Finalize Day</button>
+                <!-- Single content area -->
+                <div id="table-display">
+                    <!-- Selected table will be displayed here -->
                 </div>
             </div>
             

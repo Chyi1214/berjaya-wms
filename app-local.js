@@ -305,13 +305,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Manager view setup - Version 2.0.0 Complete Dashboard
     function setupManagerView() {
-        setupTabNavigation();
+        setupDropdownNavigation();
         refreshManagerDashboard();
         
         const refreshBtn = document.getElementById('refresh-dashboard-btn');
         refreshBtn.addEventListener('click', function() {
             console.log('Refreshing dashboard...');
             refreshManagerDashboard();
+        });
+        
+        const resetBtn = document.getElementById('reset-data-btn');
+        resetBtn.addEventListener('click', function() {
+            if (confirm('⚠️ Reset all data? This will:\n• Clear all transactions\n• Reset checked items\n• Set fresh starting point\n\nThis cannot be undone!')) {
+                resetAllData();
+            }
         });
         
         const finalizeBtn = document.getElementById('finalize-day-btn');
@@ -322,48 +329,35 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Tab navigation setup
-    function setupTabNavigation() {
-        const tabButtons = document.querySelectorAll('.tab-btn');
-        const tabContents = document.querySelectorAll('.tab-content');
+    // Dropdown navigation setup
+    function setupDropdownNavigation() {
+        const selector = document.getElementById('table-selector');
         
-        tabButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                const targetTab = this.getAttribute('data-tab');
-                
-                // Update active button
-                tabButtons.forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-                
-                // Show corresponding content
-                tabContents.forEach(content => {
-                    if (content.id === `tab-${targetTab}`) {
-                        content.style.display = 'block';
-                    } else {
-                        content.style.display = 'none';
-                    }
-                });
-                
-                // Refresh the specific tab content
-                refreshTabContent(targetTab);
-            });
+        selector.addEventListener('change', function() {
+            const selectedTable = this.value;
+            refreshTableDisplay(selectedTable);
         });
+        
+        // Show overview by default
+        refreshTableDisplay('overview');
     }
     
-    // Refresh specific tab content
-    function refreshTabContent(tab) {
-        switch(tab) {
+    // Refresh specific table display
+    function refreshTableDisplay(tableType) {
+        const display = document.getElementById('table-display');
+        
+        switch(tableType) {
             case 'overview':
                 displayOverview();
                 break;
             case 'yesterday':
-                displayYesterdayTable();
+                display.innerHTML = generateTableHTML(yesterdayResultTable, 'Yesterday\'s Final Inventory');
                 break;
             case 'checked':
-                displayCheckedTable();
+                display.innerHTML = generateTableHTML(checkedItemTable, 'Today\'s Counted Items');
                 break;
             case 'transaction':
-                displayTransactionTable();
+                display.innerHTML = generateTableHTML(transactionItemTable, 'Expected Based on Transactions');
                 break;
             case 'logs':
                 displayTransactionLogs();
@@ -376,17 +370,38 @@ document.addEventListener('DOMContentLoaded', function() {
         // Load fresh data
         loadDataFromLocalStorage();
         
-        // Refresh active tab
-        const activeTab = document.querySelector('.tab-btn.active');
-        if (activeTab) {
-            const tabName = activeTab.getAttribute('data-tab');
-            refreshTabContent(tabName);
+        // Refresh current view
+        const selector = document.getElementById('table-selector');
+        if (selector) {
+            const currentTable = selector.value;
+            refreshTableDisplay(currentTable);
         }
+    }
+    
+    // Reset all data function
+    function resetAllData() {
+        console.log('Resetting all data to fresh state...');
+        
+        // Clear localStorage completely
+        localStorage.removeItem('berjaya_item_table');
+        localStorage.removeItem('berjaya_transaction_log');
+        localStorage.removeItem('berjaya_yesterday_table');
+        localStorage.removeItem('berjaya_checked_table');
+        localStorage.removeItem('berjaya_transaction_table');
+        localStorage.removeItem('berjaya_pending_transactions');
+        
+        // Reset all variables to initial state
+        pendingTransactions = [];
+        transactionLog = [];
+        checkedItemTable = {};
+        
+        // Reload initial data
+        location.reload(); // Simplest way to reset everything cleanly
     }
     
     // Display overview with comparison
     function displayOverview() {
-        const display = document.getElementById('overview-display');
+        const display = document.getElementById('table-display');
         
         // Load all three tables
         loadDataFromLocalStorage();
@@ -542,7 +557,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Display transaction logs
     function displayTransactionLogs() {
-        const display = document.getElementById('logs-display');
+        const display = document.getElementById('table-display');
         
         if (transactionLog.length === 0) {
             display.innerHTML = '<p>No transactions recorded yet.</p>';

@@ -240,38 +240,46 @@ footer {
     background-color: #e9ecef;      /* Highlight on hover */
 }
 
-/* Version 2.0.0: Tab navigation for manager dashboard */
-.tab-navigation {
-    display: flex;
-    gap: 5px;
-    border-bottom: 2px solid #ddd;
-    flex-wrap: wrap;
+/* Version 2.0.0: Manager dashboard with dropdown navigation */
+.manager-controls {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.tab-btn {
-    padding: 10px 20px;
-    background: #f0f0f0;
+.manager-controls label {
+    font-weight: bold;
+    color: #495057;
+}
+
+.manager-controls select {
+    min-width: 200px;
+    font-size: 14px;
+}
+
+.manager-controls button {
     border: none;
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    font-weight: bold;
+    transition: all 0.3s ease;
 }
 
-.tab-btn:hover {
-    background: #e0e0e0;
+.manager-controls button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-.tab-btn.active {
-    background: #4169E1;
-    color: white;
-}
-
-.tab-content {
-    padding: 20px;
+#table-display {
     background: white;
-    border: 1px solid #ddd;
-    border-radius: 0 0 5px 5px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+    min-height: 400px;
+    padding: 20px;
 }
 
 /* Comparison table highlighting */
