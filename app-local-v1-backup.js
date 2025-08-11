@@ -145,21 +145,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // Logistics workflow setup
     function setupLogisticsWorkflow() {
         const checkInventoryBtn = document.getElementById('check-inventory-logistics-btn');
-        const transactionBtn = document.getElementById('transaction-logistics-btn');
         const countingForm = document.getElementById('logistics-counting-form');
-        const transactionForm = document.getElementById('logistics-transaction-form');
         
         checkInventoryBtn.addEventListener('click', function() {
             console.log('Check Inventory clicked in Logistics');
-            transactionForm.style.display = 'none';
             showCountingForm(countingForm, 'logistics');
-        });
-        
-        // Version 2.0.0: Transaction button
-        transactionBtn.addEventListener('click', function() {
-            console.log('Transaction clicked in Logistics');
-            countingForm.style.display = 'none';
-            showTransactionForm(transactionForm, 'logistics');
         });
     }
     
@@ -189,31 +179,29 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function setupProductionCounting() {
         const productionCounting = document.getElementById('production-counting');
-        productionCounting.style.display = 'block';
+        productionCounting.innerHTML = `
+            <h3 data-lang="production_count_title" data-var-zone="${selectedZone}">${languageManager.getText('production_count_title', {zone: selectedZone})}</h3>
+            <button id="check-inventory-production-btn" data-lang="check_inventory">${languageManager.getText('check_inventory')}</button>
+            <div id="production-counting-form" style="display: none;">
+                <!-- Counting form will be inserted here -->
+            </div>
+            <button id="back-to-zone-selection" data-lang="change_zone">${languageManager.getText('change_zone') || 'Change Zone'}</button>
+        `;
         
+        // Add event listeners for production counting
         const checkInventoryProductionBtn = document.getElementById('check-inventory-production-btn');
-        const transactionProductionBtn = document.getElementById('transaction-production-btn');
+        const backToZoneBtn = document.getElementById('back-to-zone-selection');
         const productionCountingForm = document.getElementById('production-counting-form');
-        const productionTransactionForm = document.getElementById('production-transaction-form');
         
-        // Clear any existing listeners first
-        const newCheckBtn = checkInventoryProductionBtn.cloneNode(true);
-        checkInventoryProductionBtn.parentNode.replaceChild(newCheckBtn, checkInventoryProductionBtn);
-        const newTransBtn = transactionProductionBtn.cloneNode(true);
-        transactionProductionBtn.parentNode.replaceChild(newTransBtn, transactionProductionBtn);
-        
-        // Add event listeners
-        document.getElementById('check-inventory-production-btn').addEventListener('click', function() {
+        checkInventoryProductionBtn.addEventListener('click', function() {
             console.log('Check Inventory clicked in Production Zone', selectedZone);
-            productionTransactionForm.style.display = 'none';
             showCountingForm(productionCountingForm, `production_zone_${selectedZone}`);
         });
         
-        // Version 2.0.0: Transaction button for production
-        document.getElementById('transaction-production-btn').addEventListener('click', function() {
-            console.log('Transaction clicked in Production Zone', selectedZone);
-            productionCountingForm.style.display = 'none';
-            showTransactionForm(productionTransactionForm, `production_zone_${selectedZone}`);
+        backToZoneBtn.addEventListener('click', function() {
+            document.getElementById('zone-selection').style.display = 'block';
+            productionCounting.style.display = 'none';
+            selectedZone = null;
         });
     }
     
@@ -490,134 +478,4 @@ function closeMenu() {
     
     // Restore body scrolling
     document.body.style.overflow = '';
-}
-
-// Version 2.0.0: Transaction form functions
-function showTransactionForm(container, fromLocation) {
-    // Check for pending incoming transactions first
-    const pendingIncoming = getPendingTransactions(fromLocation);
-    
-    let html = `<h3 data-lang="transaction_title">Transaction</h3>`;
-    
-    // Show pending incoming transactions
-    if (pendingIncoming.length > 0) {
-        html += `
-            <div class="pending-transactions">
-                <h4>Incoming Transactions</h4>
-                ${pendingIncoming.map(t => `
-                    <div class="transaction-card" style="border: 2px solid #ffa500; padding: 10px; margin: 10px 0; border-radius: 5px;">
-                        <p><strong>ID:</strong> ${t.id}</p>
-                        <p><strong>From:</strong> ${getLocationDisplayName(t.from_location)}</p>
-                        <p><strong>SKU:</strong> ${t.sku} - Amount: ${t.amount}</p>
-                        <p><strong>Sender:</strong> ${t.created_by}</p>
-                        <button onclick="confirmIncomingTransaction('${t.id}')" style="background-color: #4CAF50;">
-                            Confirm Receipt
-                        </button>
-                    </div>
-                `).join('')}
-            </div>
-            <hr>
-        `;
-    }
-    
-    // Outgoing transaction form (only for logistics)
-    if (fromLocation === 'logistics') {
-        const availableSKUs = getAvailableSKUs();
-        const productionZones = Array.from({length: 30}, (_, i) => i + 1);
-        
-        html += `
-            <div class="outgoing-transaction">
-                <h4>Send Items</h4>
-                <div class="form-group">
-                    <label for="trans-sku">SKU:</label>
-                    <select id="trans-sku" required>
-                        <option value="">Select SKU...</option>
-                        ${availableSKUs.map(sku => {
-                            const item = getItemBySKU(sku);
-                            return `<option value="${sku}">${sku} - ${item ? item.name : 'Unknown'}</option>`;
-                        }).join('')}
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="trans-amount">Amount:</label>
-                    <input type="number" id="trans-amount" min="1" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="trans-destination">Send to:</label>
-                    <select id="trans-destination" required>
-                        <option value="">Select destination...</option>
-                        ${productionZones.map(zone => 
-                            `<option value="production_zone_${zone}">Production Zone ${zone}</option>`
-                        ).join('')}
-                        <option value="waste">Waste Bin</option>
-                        <option value="lost">Lost Items</option>
-                    </select>
-                </div>
-                
-                <button onclick="createOutgoingTransaction('${fromLocation}')" style="background-color: #2196F3;">
-                    Create Transaction
-                </button>
-            </div>
-        `;
-    }
-    
-    container.innerHTML = html;
-    container.style.display = 'block';
-}
-
-// Handle incoming transaction confirmation
-window.confirmIncomingTransaction = function(transactionId) {
-    const transaction = pendingTransactions.find(t => t.id === transactionId);
-    if (!transaction) {
-        alert('Transaction not found');
-        return;
-    }
-    
-    // Show OTP input dialog
-    const otp = prompt(`Enter OTP for transaction ${transactionId}:`);
-    if (!otp) return;
-    
-    const result = confirmTransaction(transactionId, otp);
-    
-    if (result.success) {
-        alert(`✓ Transaction confirmed!\nSKU: ${transaction.sku}\nAmount: ${transaction.amount}`);
-        // Refresh the form
-        const currentLocation = currentRole === 'logistics' ? 'logistics' : `production_zone_${selectedZone}`;
-        const container = currentRole === 'logistics' ? 
-            document.getElementById('logistics-transaction-form') : 
-            document.getElementById('production-transaction-form');
-        showTransactionForm(container, currentLocation);
-    } else {
-        alert(`✗ Error: ${result.message}`);
-    }
-};
-
-// Create outgoing transaction
-window.createOutgoingTransaction = function(fromLocation) {
-    const sku = document.getElementById('trans-sku').value;
-    const amount = document.getElementById('trans-amount').value;
-    const destination = document.getElementById('trans-destination').value;
-    
-    if (!sku || !amount || !destination) {
-        alert('Please fill all fields');
-        return;
-    }
-    
-    const transaction = createTransaction(sku, amount, fromLocation, destination);
-    
-    // Show success with OTP
-    alert(`✓ Transaction created!\n\nID: ${transaction.id}\nOTP: ${transaction.otp}\n\nShare this OTP with the receiver`);
-    
-    // Clear form
-    document.getElementById('trans-sku').value = '';
-    document.getElementById('trans-amount').value = '';
-    document.getElementById('trans-destination').value = '';
-};
-
-// Helper function for location display names
-function getLocationDisplayName(location) {
-    const locations = getLocations();
-    return locations[location] || location;
 }
