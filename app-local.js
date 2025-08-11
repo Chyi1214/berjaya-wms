@@ -225,14 +225,14 @@ document.addEventListener('DOMContentLoaded', function() {
             <h3 data-lang="inventory_counting">${languageManager.getText('inventory_counting') || 'Inventory Counting'}</h3>
             <div class="counting-form">
                 <div class="form-group">
-                    <label for="sku-select" data-lang="sku_label">${languageManager.getText('sku_label')}</label>
-                    <select id="sku-select" required>
-                        <option value="">${languageManager.getText('select_sku') || 'Select SKU...'}</option>
-                        ${availableSKUs.map(sku => {
-                            const item = getItemBySKU(sku);
-                            return `<option value="${sku}">${sku} - ${item ? item.name : 'Unknown'}</option>`;
-                        }).join('')}
-                    </select>
+                    <label for="sku-search" data-lang="sku_label">${languageManager.getText('sku_label')}</label>
+                    <div class="searchable-dropdown">
+                        <input type="text" id="sku-search" placeholder="Type to search SKU..." autocomplete="off" required>
+                        <div id="sku-dropdown" class="dropdown-list" style="display: none;">
+                            <!-- SKU options will be populated here -->
+                        </div>
+                    </div>
+                    <input type="hidden" id="selected-sku" value="">
                 </div>
                 
                 <div class="form-group">
@@ -262,14 +262,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         container.style.display = 'block';
         
+        // Setup searchable SKU dropdown
+        setupSearchableDropdown(availableSKUs);
+        
         // Add event listeners for the form
         const submitBtn = document.getElementById('submit-count-btn');
         const cancelBtn = document.getElementById('cancel-count-btn');
-        const skuSelect = document.getElementById('sku-select');
+        const selectedSkuInput = document.getElementById('selected-sku');
         const statusDiv = document.getElementById('count-status');
         
         submitBtn.addEventListener('click', function() {
-            const sku = skuSelect.value;
+            const sku = selectedSkuInput.value;
             const amount = amountInput.value;
             
             if (!sku) {
@@ -380,23 +383,33 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Reset all data function
     function resetAllData() {
-        console.log('Resetting all data to fresh state...');
+        console.log('Resetting all data to synchronized state...');
         
-        // Clear localStorage completely
-        localStorage.removeItem('berjaya_item_table');
-        localStorage.removeItem('berjaya_transaction_log');
-        localStorage.removeItem('berjaya_yesterday_table');
-        localStorage.removeItem('berjaya_checked_table');
-        localStorage.removeItem('berjaya_transaction_table');
-        localStorage.removeItem('berjaya_pending_transactions');
+        // Load current itemTable as the baseline
+        loadDataFromLocalStorage();
+        const currentItemTable = getItemTable();
         
-        // Reset all variables to initial state
+        // Set all three tables to be identical (current itemTable)
+        yesterdayResultTable = JSON.parse(JSON.stringify(currentItemTable));
+        transactionItemTable = JSON.parse(JSON.stringify(currentItemTable));  
+        checkedItemTable = JSON.parse(JSON.stringify(currentItemTable));
+        
+        // Clear all transactions and logs
         pendingTransactions = [];
         transactionLog = [];
-        checkedItemTable = {};
         
-        // Reload initial data
-        location.reload(); // Simplest way to reset everything cleanly
+        // Save the synchronized state
+        saveDataToLocalStorage();
+        
+        console.log('✅ Reset complete: All tables now synchronized');
+        console.log('Yesterday =', Object.keys(yesterdayResultTable).length, 'items');
+        console.log('Transaction =', Object.keys(transactionItemTable).length, 'items'); 
+        console.log('Checked =', Object.keys(checkedItemTable).length, 'items');
+        
+        // Refresh the current view
+        refreshManagerDashboard();
+        
+        alert('✅ Data reset complete!\n\n• All tables now synchronized\n• Transactions cleared\n• Ready for fresh testing');
     }
     
     // Display overview with comparison
@@ -424,6 +437,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Generate comparison table
     function generateComparisonTable() {
+        // Ensure we have the latest data
+        loadDataFromLocalStorage();
+        
         const allSKUs = new Set([
             ...Object.keys(checkedItemTable),
             ...Object.keys(transactionItemTable)
@@ -435,25 +451,37 @@ document.addEventListener('DOMContentLoaded', function() {
             const checked = checkedItemTable[sku];
             const expected = transactionItemTable[sku];
             
+            // Helper function to calculate correct total
+            function calculateTotal(item) {
+                if (!item) return 0;
+                let total = (item.amount_logistics || 0);
+                for (let i = 1; i <= 30; i++) {
+                    total += (item[`amount_production_zone_${i}`] || 0);
+                }
+                return total;
+            }
+            
             if (!checked && expected) {
                 // Not counted yet
+                const expectedTotal = calculateTotal(expected);
                 html += `<tr class="missing-item">
                     <td>${sku}</td>
                     <td>Not counted</td>
-                    <td>${expected.total_amount || 0}</td>
+                    <td>${expectedTotal}</td>
                     <td>Missing count</td>
                 </tr>`;
             } else if (checked && !expected) {
                 // Extra item counted
+                const checkedTotal = calculateTotal(checked);
                 html += `<tr class="extra-item">
                     <td>${sku}</td>
-                    <td>${checked.total_amount || 0}</td>
+                    <td>${checkedTotal}</td>
                     <td>No record</td>
                     <td>Unexpected item</td>
                 </tr>`;
             } else if (checked && expected) {
-                const checkedTotal = checked.total_amount || 0;
-                const expectedTotal = expected.total_amount || 0;
+                const checkedTotal = calculateTotal(checked);
+                const expectedTotal = calculateTotal(expected);
                 const diff = checkedTotal - expectedTotal;
                 
                 if (diff !== 0) {
@@ -480,10 +508,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Generate summary statistics
     function generateSummaryStats() {
+        // Ensure we have the latest data
+        loadDataFromLocalStorage();
+        
         const pendingCount = pendingTransactions.filter(t => t.status === 'pending').length;
         const completedToday = transactionLog.filter(t => {
             const today = new Date().toDateString();
-            return new Date(t.created_at).toDateString() === today;
+            return new Date(t.created_at || t.timestamp).toDateString() === today;
         }).length;
         
         return `
@@ -540,13 +571,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 productionTotal += item[`amount_production_zone_${i}`] || 0;
             }
             
+            // Calculate correct total: Logistics + Production
+            const logisticsAmount = item.amount_logistics || 0;
+            const calculatedTotal = logisticsAmount + productionTotal;
+            
             html += `
                 <tr>
                     <td><strong>${item.sku}</strong></td>
                     <td>${item.name}</td>
-                    <td>${item.amount_logistics || 0}</td>
+                    <td>${logisticsAmount}</td>
                     <td>${productionTotal}</td>
-                    <td><strong>${item.total_amount || 0}</strong></td>
+                    <td><strong>${calculatedTotal}</strong></td>
                 </tr>
             `;
         });
@@ -870,14 +905,14 @@ function showTransactionForm(container, fromLocation) {
             <div class="outgoing-transaction">
                 <h4>Send Items</h4>
                 <div class="form-group">
-                    <label for="trans-sku">SKU:</label>
-                    <select id="trans-sku" required>
-                        <option value="">Select SKU...</option>
-                        ${availableSKUs.map(sku => {
-                            const item = getItemBySKU(sku);
-                            return `<option value="${sku}">${sku} - ${item ? item.name : 'Unknown'}</option>`;
-                        }).join('')}
-                    </select>
+                    <label for="trans-sku-search">SKU:</label>
+                    <div class="searchable-dropdown">
+                        <input type="text" id="trans-sku-search" placeholder="Type to search SKU..." autocomplete="off" required>
+                        <div id="trans-sku-dropdown" class="dropdown-list" style="display: none;">
+                            <!-- SKU options will be populated here -->
+                        </div>
+                    </div>
+                    <input type="hidden" id="trans-selected-sku" value="">
                 </div>
                 
                 <div class="form-group">
@@ -906,6 +941,11 @@ function showTransactionForm(container, fromLocation) {
     
     container.innerHTML = html;
     container.style.display = 'block';
+    
+    // Setup searchable dropdown for transaction form if it exists
+    if (document.getElementById('trans-sku-search')) {
+        setupTransactionDropdown(availableSKUs);
+    }
 }
 
 // Handle incoming transaction confirmation
@@ -935,9 +975,79 @@ window.confirmIncomingTransaction = function(transactionId) {
     }
 };
 
+// Setup searchable dropdown for transaction form
+function setupTransactionDropdown(availableSKUs) {
+    const searchInput = document.getElementById('trans-sku-search');
+    const dropdown = document.getElementById('trans-sku-dropdown');
+    const hiddenInput = document.getElementById('trans-selected-sku');
+    
+    if (!searchInput || !dropdown || !hiddenInput) return;
+    
+    // Create all SKU options
+    function renderDropdown(skus) {
+        dropdown.innerHTML = '';
+        
+        if (skus.length === 0) {
+            dropdown.innerHTML = '<div class="dropdown-item no-results">No SKUs found</div>';
+            dropdown.style.display = 'block';
+            return;
+        }
+        
+        skus.forEach(sku => {
+            const item = getItemBySKU(sku);
+            const div = document.createElement('div');
+            div.className = 'dropdown-item';
+            div.innerHTML = `<strong>${sku}</strong> - ${item ? item.name : 'Unknown'}`;
+            div.dataset.sku = sku;
+            
+            div.addEventListener('click', function() {
+                searchInput.value = `${sku} - ${item ? item.name : 'Unknown'}`;
+                hiddenInput.value = sku;
+                dropdown.style.display = 'none';
+            });
+            
+            dropdown.appendChild(div);
+        });
+        
+        dropdown.style.display = 'block';
+    }
+    
+    // Search functionality (same as regular dropdown)
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        if (searchTerm.length === 0) {
+            dropdown.style.display = 'none';
+            hiddenInput.value = '';
+            return;
+        }
+        
+        const filteredSKUs = availableSKUs.filter(sku => {
+            const item = getItemBySKU(sku);
+            const skuMatch = sku.toLowerCase().includes(searchTerm);
+            const nameMatch = item && item.name.toLowerCase().includes(searchTerm);
+            return skuMatch || nameMatch;
+        });
+        
+        renderDropdown(filteredSKUs);
+    });
+    
+    searchInput.addEventListener('focus', function() {
+        if (this.value.length === 0) {
+            renderDropdown(availableSKUs);
+        }
+    });
+    
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
+}
+
 // Create outgoing transaction
 window.createOutgoingTransaction = function(fromLocation) {
-    const sku = document.getElementById('trans-sku').value;
+    const sku = document.getElementById('trans-selected-sku').value;
     const amount = document.getElementById('trans-amount').value;
     const destination = document.getElementById('trans-destination').value;
     
@@ -952,7 +1062,8 @@ window.createOutgoingTransaction = function(fromLocation) {
     alert(`✓ Transaction created!\n\nID: ${transaction.id}\nOTP: ${transaction.otp}\n\nShare this OTP with the receiver`);
     
     // Clear form
-    document.getElementById('trans-sku').value = '';
+    document.getElementById('trans-sku-search').value = '';
+    document.getElementById('trans-selected-sku').value = '';
     document.getElementById('trans-amount').value = '';
     document.getElementById('trans-destination').value = '';
 };
@@ -961,4 +1072,116 @@ window.createOutgoingTransaction = function(fromLocation) {
 function getLocationDisplayName(location) {
     const locations = getLocations();
     return locations[location] || location;
+}
+
+// Setup searchable dropdown for SKU selection
+function setupSearchableDropdown(availableSKUs) {
+    const searchInput = document.getElementById('sku-search');
+    const dropdown = document.getElementById('sku-dropdown');
+    const hiddenInput = document.getElementById('selected-sku');
+    
+    if (!searchInput || !dropdown || !hiddenInput) return;
+    
+    // Create all SKU options
+    function renderDropdown(skus) {
+        dropdown.innerHTML = '';
+        
+        if (skus.length === 0) {
+            dropdown.innerHTML = '<div class="dropdown-item no-results">No SKUs found</div>';
+            dropdown.style.display = 'block';
+            return;
+        }
+        
+        skus.forEach(sku => {
+            const item = getItemBySKU(sku);
+            const div = document.createElement('div');
+            div.className = 'dropdown-item';
+            div.innerHTML = `<strong>${sku}</strong> - ${item ? item.name : 'Unknown'}`;
+            div.dataset.sku = sku;
+            
+            div.addEventListener('click', function() {
+                searchInput.value = `${sku} - ${item ? item.name : 'Unknown'}`;
+                hiddenInput.value = sku;
+                dropdown.style.display = 'none';
+            });
+            
+            dropdown.appendChild(div);
+        });
+        
+        dropdown.style.display = 'block';
+    }
+    
+    // Search functionality
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        
+        if (searchTerm.length === 0) {
+            dropdown.style.display = 'none';
+            hiddenInput.value = '';
+            return;
+        }
+        
+        // Filter SKUs based on search
+        const filteredSKUs = availableSKUs.filter(sku => {
+            const item = getItemBySKU(sku);
+            const skuMatch = sku.toLowerCase().includes(searchTerm);
+            const nameMatch = item && item.name.toLowerCase().includes(searchTerm);
+            return skuMatch || nameMatch;
+        });
+        
+        renderDropdown(filteredSKUs);
+    });
+    
+    // Show all options when focused
+    searchInput.addEventListener('focus', function() {
+        if (this.value.length === 0) {
+            renderDropdown(availableSKUs);
+        }
+    });
+    
+    // Hide dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
+    
+    // Handle keyboard navigation
+    searchInput.addEventListener('keydown', function(e) {
+        const items = dropdown.querySelectorAll('.dropdown-item:not(.no-results)');
+        let currentIndex = -1;
+        
+        // Find currently selected item
+        items.forEach((item, index) => {
+            if (item.classList.contains('selected')) {
+                currentIndex = index;
+            }
+        });
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            currentIndex = Math.min(currentIndex + 1, items.length - 1);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            currentIndex = Math.max(currentIndex - 1, 0);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentIndex >= 0 && items[currentIndex]) {
+                items[currentIndex].click();
+            }
+            return;
+        } else if (e.key === 'Escape') {
+            dropdown.style.display = 'none';
+            return;
+        }
+        
+        // Update selection
+        items.forEach((item, index) => {
+            if (index === currentIndex) {
+                item.classList.add('selected');
+            } else {
+                item.classList.remove('selected');
+            }
+        });
+    });
 }

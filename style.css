@@ -296,6 +296,68 @@ footer {
     background-color: #c8e6c9 !important;
 }
 
+/* Searchable dropdown for SKU selection */
+.searchable-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+.searchable-dropdown input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.searchable-dropdown input:focus {
+    border-color: #4169E1;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.1);
+}
+
+.dropdown-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid #4169E1;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.dropdown-item {
+    padding: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
+}
+
+.dropdown-item:hover,
+.dropdown-item.selected {
+    background-color: #f0f8ff;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item.no-results {
+    color: #666;
+    font-style: italic;
+    cursor: default;
+}
+
+.dropdown-item.no-results:hover {
+    background-color: transparent;
+}
+
 /* Zone selection styles */
 #zone-selection {
     text-align: center;             /* Center zone selection */
