@@ -631,6 +631,17 @@ document.addEventListener('DOMContentLoaded', function() {
         
         sortedLogs.forEach(log => {
             const time = new Date(log.created_at || log.timestamp).toLocaleString();
+            
+            // Format status with visual indicators
+            let statusDisplay = log.status || 'completed';
+            if (log.status === 'auto-approved') {
+                statusDisplay = '🗑️ Auto-approved';
+            } else if (log.status === 'completed') {
+                statusDisplay = '✅ Completed';
+            } else if (log.status === 'pending') {
+                statusDisplay = '⏳ Pending';
+            }
+            
             html += `
                 <tr>
                     <td>${log.id || 'N/A'}</td>
@@ -638,7 +649,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${log.sku}</td>
                     <td>${log.amount}</td>
                     <td>${getLocationDisplayName(log.from_location || log.location)} → ${getLocationDisplayName(log.to_location || 'N/A')}</td>
-                    <td>${log.status || 'completed'}</td>
+                    <td>${statusDisplay}</td>
                     <td>${log.created_by || log.counted_by}</td>
                 </tr>
             `;
@@ -1077,11 +1088,18 @@ window.createOutgoingTransaction = async function(fromLocation) {
     
     const transaction = createTransaction(sku, amount, fromLocation, destination);
     
-    // Show success with OTP
-    await modal.alert(
-        '🚀 Transaction Created!',
-        `Transaction ID: ${transaction.id}\nOTP: ${transaction.otp}\n\nShare this OTP with the receiver to confirm the transaction.`
-    );
+    // Show different success messages for waste/lost vs regular transactions
+    if (transaction.status === 'auto-approved') {
+        await modal.alert(
+            '✅ Items Disposed!',
+            `Transaction ID: ${transaction.id}\n\nItems sent to ${destination === 'waste' ? 'Waste Bin' : 'Lost Items'} successfully.\n\nNo confirmation needed - transaction completed automatically.`
+        );
+    } else {
+        await modal.alert(
+            '🚀 Transaction Created!',
+            `Transaction ID: ${transaction.id}\nOTP: ${transaction.otp}\n\nShare this OTP with the receiver to confirm the transaction.`
+        );
+    }
     
     // Clear form
     document.getElementById('trans-sku-search').value = '';

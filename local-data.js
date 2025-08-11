@@ -293,15 +293,15 @@ function clearCurrentUser() {
 
 // Version 2.0.0: Transaction functions with OTP
 function createTransaction(sku, amount, fromLocation, toLocation) {
-    // Generate 4-digit OTP
-    const otp = Math.floor(1000 + Math.random() * 9000).toString();
+    // Check if this is a waste or lost transaction (auto-confirm these)
+    const isWasteOrLost = (toLocation === 'waste' || toLocation === 'lost');
     
     // Generate transaction ID (TRX-YYYYMMDD-XXX)
     const date = new Date();
     const dateStr = date.getFullYear() + 
                    String(date.getMonth() + 1).padStart(2, '0') + 
                    String(date.getDate()).padStart(2, '0');
-    const sequence = (pendingTransactions.length + 1).toString().padStart(3, '0');
+    const sequence = (pendingTransactions.length + transactionLog.length + 1).toString().padStart(3, '0');
     const transactionId = `TRX-${dateStr}-${sequence}`;
     
     const transaction = {
@@ -310,17 +310,51 @@ function createTransaction(sku, amount, fromLocation, toLocation) {
         amount: parseInt(amount),
         from_location: fromLocation,
         to_location: toLocation,
-        otp: otp,
-        status: 'pending',
         created_by: currentUser ? currentUser.email : 'test@user.com',
         created_at: new Date().toISOString(),
-        expires_at: new Date(Date.now() + 3600000).toISOString() // 1 hour expiry
+        transaction_type: 'transfer'
     };
     
-    pendingTransactions.push(transaction);
-    saveDataToLocalStorage();
+    if (isWasteOrLost) {
+        // Auto-confirm waste/lost transactions immediately
+        transaction.status = 'auto-approved';
+        transaction.confirmed_by = 'system';
+        transaction.confirmed_at = new Date().toISOString();
+        transaction.otp = 'N/A';
+        
+        // Immediately update transaction table
+        if (transactionItemTable[sku]) {
+            const fromKey = `amount_${fromLocation}`;
+            const toKey = `amount_${toLocation}`;
+            
+            // Subtract from source
+            transactionItemTable[sku][fromKey] = Math.max(0, (transactionItemTable[sku][fromKey] || 0) - parseInt(amount));
+            
+            // For waste/lost, we don't add to destination (items are gone)
+            // Update total
+            let total = transactionItemTable[sku].amount_logistics || 0;
+            for (let i = 1; i <= 30; i++) {
+                total += transactionItemTable[sku][`amount_production_zone_${i}`] || 0;
+            }
+            transactionItemTable[sku].total_amount = total;
+        }
+        
+        // Add directly to transaction log
+        transactionLog.push(transaction);
+        
+        console.log('Waste/Lost transaction auto-approved:', transaction);
+    } else {
+        // Regular transaction - requires OTP confirmation
+        const otp = Math.floor(1000 + Math.random() * 9000).toString();
+        transaction.otp = otp;
+        transaction.status = 'pending';
+        transaction.expires_at = new Date(Date.now() + 3600000).toISOString(); // 1 hour expiry
+        
+        pendingTransactions.push(transaction);
+        console.log('Regular transaction created (pending OTP):', transaction);
+    }
     
-    console.log('Transaction created:', transaction);
+    saveDataToLocalStorage();
     return transaction;
 }
 
