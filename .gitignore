@@ -1,0 +1,36 @@
+# Firebase Configuration
+firebase-config.js
+
+# Environment Variables
+.env
+.env.local
+.env.production
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.temp
+
+# Node modules (if we add them later)
+node_modules/
+
+# Build outputs
+dist/
+build/
+
+# Cache
+.cache/
+
+# Firebase
+.firebase/
+firebase-debug.log
