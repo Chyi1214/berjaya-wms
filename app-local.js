@@ -11,6 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const productionSection = document.getElementById('production-section');
     const managerSection = document.getElementById('manager-section');
     
+    // Get home button reference
+    const homeBtn = document.getElementById('home-btn');
+    
     // Get references to buttons and elements
     const googleLoginBtn = document.getElementById('google-login-btn');
     const logoutBtn = document.getElementById('logout-btn');
@@ -95,6 +98,12 @@ document.addEventListener('DOMContentLoaded', function() {
         showRoleSelection();
     });
     
+    // Home button event listener
+    homeBtn.addEventListener('click', function() {
+        console.log('Home button clicked');
+        showRoleSelection();
+    });
+    
     // Section display functions
     function hideAllSections() {
         loginSection.style.display = 'none';
@@ -108,6 +117,9 @@ document.addEventListener('DOMContentLoaded', function() {
         hideAllSections();
         loginSection.style.display = 'block';
         
+        // Hide home button on login screen
+        homeBtn.style.display = 'none';
+        
         // Reset login button
         googleLoginBtn.textContent = 'Login with Google (Test Mode)';
         googleLoginBtn.disabled = false;
@@ -116,6 +128,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function showRoleSelection() {
         hideAllSections();
         roleSelectionSection.style.display = 'block';
+        
+        // Hide home button on role selection screen (users are already at home)
+        homeBtn.style.display = 'none';
         
         // Display user name
         const user = getCurrentUser();
@@ -127,18 +142,30 @@ document.addEventListener('DOMContentLoaded', function() {
     function showLogisticsSection() {
         hideAllSections();
         logisticsSection.style.display = 'block';
+        
+        // Show home button when in role sections
+        homeBtn.style.display = 'block';
+        
         setupLogisticsWorkflow();
     }
     
     function showProductionSection() {
         hideAllSections();
         productionSection.style.display = 'block';
+        
+        // Show home button when in role sections
+        homeBtn.style.display = 'block';
+        
         setupProductionWorkflow();
     }
     
     function showManagerSection() {
         hideAllSections();
         managerSection.style.display = 'block';
+        
+        // Show home button when in role sections
+        homeBtn.style.display = 'block';
+        
         setupManagerView();
     }
     
@@ -148,6 +175,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const transactionBtn = document.getElementById('transaction-logistics-btn');
         const countingForm = document.getElementById('logistics-counting-form');
         const transactionForm = document.getElementById('logistics-transaction-form');
+        
+        // Show transaction form by default (with BOM option)
+        console.log('Setting up logistics - showing transaction form by default');
+        countingForm.style.display = 'none';
+        showTransactionForm(transactionForm, 'logistics');
         
         checkInventoryBtn.addEventListener('click', function() {
             console.log('Check Inventory clicked in Logistics');
@@ -168,6 +200,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const zoneInput = document.getElementById('zone-input');
         const selectZoneBtn = document.getElementById('select-zone-btn');
         const productionCounting = document.getElementById('production-counting');
+        const zoneSelection = document.getElementById('zone-selection');
+        
+        // Always show zone selection and hide counting interface when entering production
+        zoneSelection.style.display = 'block';
+        productionCounting.style.display = 'none';
+        
+        // Clear previous zone selection
+        selectedZone = null;
+        zoneInput.value = '';
         
         selectZoneBtn.addEventListener('click', function() {
             const zoneNumber = parseInt(zoneInput.value);
@@ -177,7 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Zone selected:', selectedZone);
                 
                 // Hide zone selection, show counting interface
-                document.getElementById('zone-selection').style.display = 'none';
+                zoneSelection.style.display = 'none';
                 productionCounting.style.display = 'block';
                 
                 setupProductionCounting();
@@ -292,7 +333,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 statusDiv.innerHTML = `<p style="color: green;">✓ ${languageManager.getText('count_saved')}</p>`;
                 
                 // Clear form
-                skuSelect.value = '';
+                document.getElementById('sku-search').value = '';
+                document.getElementById('selected-sku').value = '';
                 amountInput.value = '';
                 
                 console.log('Count submitted successfully');
@@ -308,36 +350,48 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Manager view setup - Version 2.0.0 Complete Dashboard
     function setupManagerView() {
+        console.log('Setting up manager view...');
         setupDropdownNavigation();
         refreshManagerDashboard();
         
         const refreshBtn = document.getElementById('refresh-dashboard-btn');
-        refreshBtn.addEventListener('click', function() {
-            console.log('Refreshing dashboard...');
-            refreshManagerDashboard();
-        });
+        console.log('Refresh button found:', refreshBtn);
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', function() {
+                console.log('Refresh button clicked!');
+                refreshManagerDashboard();
+            });
+        }
         
         const resetBtn = document.getElementById('reset-data-btn');
-        resetBtn.addEventListener('click', async function() {
-            const confirmed = await modal.confirm(
-                '⚠️ Reset All Data?',
-                'This will:\n• Clear all transactions\n• Reset checked items\n• Set fresh starting point\n\nThis cannot be undone!'
-            );
-            if (confirmed) {
-                resetAllData();
-            }
-        });
+        console.log('Reset button found:', resetBtn);
+        if (resetBtn) {
+            resetBtn.addEventListener('click', async function() {
+                console.log('Reset button clicked!');
+                const confirmed = await modal.confirm(
+                    '⚠️ Reset All Data?',
+                    'This will:\n• Clear all transactions\n• Reset checked items\n• Set fresh starting point\n\nThis cannot be undone!'
+                );
+                if (confirmed) {
+                    resetAllData();
+                }
+            });
+        }
         
         const finalizeBtn = document.getElementById('finalize-day-btn');
-        finalizeBtn.addEventListener('click', async function() {
-            const confirmed = await modal.confirm(
-                '🎯 Finalize Day?',
-                'This will set today\'s results as tomorrow\'s starting point.\n\nAre you sure you want to finalize the day?'
-            );
-            if (confirmed) {
-                finalizeDay();
-            }
-        });
+        console.log('Finalize button found:', finalizeBtn);
+        if (finalizeBtn) {
+            finalizeBtn.addEventListener('click', async function() {
+                console.log('Finalize button clicked!');
+                const confirmed = await modal.confirm(
+                    '🎯 Finalize Day?',
+                    'This will set today\'s results as tomorrow\'s starting point.\n\nAre you sure you want to finalize the day?'
+                );
+                if (confirmed) {
+                    finalizeDay();
+                }
+            });
+        }
     }
     
     // Dropdown navigation setup
@@ -373,6 +427,9 @@ document.addEventListener('DOMContentLoaded', function() {
             case 'logs':
                 displayTransactionLogs();
                 break;
+            case 'bom':
+                displayBOMManagement();
+                break;
         }
     }
     
@@ -381,12 +438,35 @@ document.addEventListener('DOMContentLoaded', function() {
         // Load fresh data
         loadDataFromLocalStorage();
         
+        // Populate test inventory if empty
+        populateTestInventoryData();
+        
         // Refresh current view
         const selector = document.getElementById('table-selector');
         if (selector) {
             const currentTable = selector.value;
             refreshTableDisplay(currentTable);
         }
+    }
+    
+    // Populate test inventory data for testing
+    function populateTestInventoryData() {
+        console.log('Populating fresh test inventory data...');
+        
+        // Call the centralized function from local-data.js
+        populateTestInventory();
+        
+        // Get the updated data from local-data.js
+        const updatedInventory = getInventoryTable();
+        const updatedItemTable = getItemTable();
+        
+        // Initialize three tables if needed
+        if (Object.keys(yesterdayResultTable).length === 0) {
+            yesterdayResultTable = JSON.parse(JSON.stringify(updatedItemTable));
+            transactionItemTable = JSON.parse(JSON.stringify(updatedItemTable));
+        }
+        
+        console.log('Test inventory data populated for', Object.keys(updatedInventory).length, 'items');
     }
     
     // Reset all data function
@@ -402,9 +482,8 @@ document.addEventListener('DOMContentLoaded', function() {
         transactionItemTable = JSON.parse(JSON.stringify(currentItemTable));  
         checkedItemTable = JSON.parse(JSON.stringify(currentItemTable));
         
-        // Clear all transactions and logs
-        pendingTransactions = [];
-        transactionLog = [];
+        // Clear all transactions and logs using local-data.js function
+        clearAllTransactionData();
         
         // Save the synchronized state
         saveDataToLocalStorage();
@@ -417,9 +496,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // Refresh the current view
         refreshManagerDashboard();
         
+        // Force refresh any transaction forms that might be displayed
+        const productionContent = document.getElementById('production-content');
+        const logisticsContent = document.getElementById('logistics-content');
+        if (productionContent && window.selectedZone) {
+            showTransactionForm(productionContent, `production_zone_${window.selectedZone}`);
+        }
+        if (logisticsContent) {
+            showTransactionForm(logisticsContent, 'logistics');
+        }
+        
         await modal.alert(
             '✅ Data Reset Complete!',
-            '• All tables now synchronized\n• Transactions cleared\n• Ready for fresh testing'
+            '• All tables now synchronized\n• All transactions cleared\n• BOM groups cleared\n• Ready for fresh testing'
         );
     }
     
@@ -773,7 +862,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Start with login section
     showLoginSection();
-});
+}); // End of DOMContentLoaded
 
 // Language system initialization and menu handling
 function initializeLanguageSystem() {
@@ -834,6 +923,32 @@ function selectLanguage(langCode) {
     if (loginBtn.disabled) {
         loginBtn.textContent = languageManager.getText('logging_in');
     }
+    
+    // Refresh dynamic content that uses languageManager.getText()
+    refreshDynamicContent();
+}
+
+function refreshDynamicContent() {
+    // Refresh transaction forms if they're visible
+    const logisticsTransactionForm = document.getElementById('logistics-transaction-form');
+    const productionTransactionForm = document.getElementById('production-transaction-form');
+    
+    if (logisticsTransactionForm && logisticsTransactionForm.style.display !== 'none') {
+        console.log('Refreshing logistics transaction form for language change');
+        showTransactionForm(logisticsTransactionForm, 'logistics');
+    }
+    
+    if (productionTransactionForm && productionTransactionForm.style.display !== 'none' && window.selectedZone) {
+        console.log('Refreshing production transaction form for language change');
+        showTransactionForm(productionTransactionForm, `production_zone_${window.selectedZone}`);
+    }
+    
+    // Refresh manager dashboard if visible
+    const managerSection = document.getElementById('manager-section');
+    if (managerSection && managerSection.style.display !== 'none') {
+        console.log('Refreshing manager dashboard for language change');
+        refreshManagerDashboard();
+    }
 }
 
 function setupMenuEventListeners() {
@@ -892,60 +1007,177 @@ function closeMenu() {
 
 // Version 2.0.0: Transaction form functions
 function showTransactionForm(container, fromLocation) {
+    console.log('showTransactionForm called for location:', fromLocation);
+    
     // Check for pending incoming transactions first
     const pendingIncoming = getPendingTransactions(fromLocation);
+    console.log('Pending incoming transactions:', pendingIncoming);
+    console.log('All pending transactions:', getPendingTransactions()); // Show all to debug
     
-    let html = `<h3 data-lang="transaction_title">Transaction</h3>`;
+    let html = `<h3 data-lang="transaction_title">${languageManager.getText('transaction_title')}</h3>`;
+    
+    // Add auto-refresh button only for production (not logistics)
+    if (fromLocation.startsWith('production_zone_')) {
+        html += `
+            <div style="margin: 10px 0;">
+                <button id="refresh-transactions-btn" style="background-color: #4CAF50; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+                    🔄 ${languageManager.getText('refresh_transactions')}
+                </button>
+                <span id="auto-refresh-status" style="margin-left: 10px; font-size: 12px; color: #666;">
+                    ${languageManager.getText('auto_refresh_status')}
+                </span>
+            </div>
+        `;
+    }
     
     // Show pending incoming transactions
     if (pendingIncoming.length > 0) {
-        html += `
-            <div class="pending-transactions">
-                <h4>Incoming Transactions</h4>
-                ${pendingIncoming.map(t => `
-                    <div class="transaction-card" style="border: 2px solid #ffa500; padding: 10px; margin: 10px 0; border-radius: 5px;">
-                        <p><strong>ID:</strong> ${t.id}</p>
-                        <p><strong>From:</strong> ${getLocationDisplayName(t.from_location)}</p>
-                        <p><strong>SKU:</strong> ${t.sku} - Amount: ${t.amount}</p>
-                        <p><strong>Sender:</strong> ${t.created_by}</p>
-                        <button onclick="confirmIncomingTransaction('${t.id}')" style="background-color: #4CAF50;">
-                            Confirm Receipt
-                        </button>
+        html += `<div class="pending-transactions"><h4>${languageManager.getText('incoming_transactions')}</h4>`;
+        
+        // Group transactions by BOM group
+        const bomGroups = {};
+        const individualTransactions = [];
+        
+        pendingIncoming.forEach(t => {
+            if (t.bom_group_id) {
+                if (!bomGroups[t.bom_group_id]) {
+                    bomGroups[t.bom_group_id] = [];
+                }
+                bomGroups[t.bom_group_id].push(t);
+            } else {
+                individualTransactions.push(t);
+            }
+        });
+        
+        // Show BOM groups first
+        Object.keys(bomGroups).forEach(bomGroupId => {
+            const transactions = bomGroups[bomGroupId];
+            const firstTransaction = transactions[0];
+            const bomGroup = getBOMTransactionGroupById(bomGroupId);
+            
+            // Skip if BOM group was deleted (e.g., after reset)
+            if (!bomGroup) {
+                console.warn('BOM group', bomGroupId, 'not found - skipping display');
+                return;
+            }
+            
+            html += `
+                <div class="transaction-card" style="border: 3px solid #4169E1; padding: 15px; margin: 15px 0; border-radius: 8px; background-color: #f0f8ff;">
+                    <div style="font-weight: bold; font-size: 18px; color: #4169E1; margin-bottom: 10px;">
+                        🎁 ${languageManager.getText('bom_assembly')} ${bomGroup ? bomGroup.bom_name : 'Unknown BOM'}
                     </div>
-                `).join('')}
-            </div>
-            <hr>
-        `;
+                    <p><strong>BOM Code:</strong> ${bomGroup ? bomGroup.bom_code : 'Unknown'}</p>
+                    <p><strong>${languageManager.getText('from_location')}</strong> ${getLocationDisplayName(firstTransaction.from_location)}</p>
+                    <p><strong>${languageManager.getText('sender')}</strong> ${firstTransaction.created_by}</p>
+                    <p><strong>${languageManager.getText('quantity')}</strong> ${bomGroup ? bomGroup.quantity : '1'} ${languageManager.getText('assemblies')}</p>
+                    
+                    <div style="margin: 10px 0; padding: 10px; background-color: white; border-radius: 5px;">
+                        <strong>${languageManager.getText('components_included')}</strong>
+                        ${transactions.map(t => {
+                            const item = getItemBySKU(t.sku);
+                            const itemName = item ? item.name : 'Unknown';
+                            return `<div style="margin: 3px 0;">• ${t.amount}x ${t.sku} - ${itemName}</div>`;
+                        }).join('')}
+                    </div>
+                    
+                    <button onclick="confirmBOMGroup('${bomGroupId}')" style="background-color: #4169E1; color: white; padding: 12px 20px; border: none; border-radius: 5px; font-weight: bold;">
+                        ${languageManager.getText('confirm_bom_receipt')}
+                    </button>
+                </div>
+            `;
+        });
+        
+        // Show individual transactions
+        individualTransactions.forEach(t => {
+            html += `
+                <div class="transaction-card" style="border: 2px solid #ffa500; padding: 10px; margin: 10px 0; border-radius: 5px;">
+                    <p><strong>ID:</strong> ${t.id}</p>
+                    <p><strong>${languageManager.getText('from_location')}</strong> ${getLocationDisplayName(t.from_location)}</p>
+                    <p><strong>SKU:</strong> ${t.sku} - Amount: ${t.amount}</p>
+                    <p><strong>${languageManager.getText('sender')}</strong> ${t.created_by}</p>
+                    <button onclick="confirmIncomingTransaction('${t.id}')" style="background-color: #4CAF50;">
+                        ${languageManager.getText('confirm_receipt')}
+                    </button>
+                </div>
+            `;
+        });
+        
+        html += `</div><hr>`;
     }
     
     // Outgoing transaction form (only for logistics)
     if (fromLocation === 'logistics') {
         const availableSKUs = getAvailableSKUs();
+        const availableBOMs = getBOMDefinitions();
         const productionZones = Array.from({length: 30}, (_, i) => i + 1);
         
         html += `
             <div class="outgoing-transaction">
-                <h4>Send Items</h4>
+                <h4>${languageManager.getText('send_items')}</h4>
+                
+                <!-- Transaction Type Selection -->
                 <div class="form-group">
-                    <label for="trans-sku-search">SKU:</label>
-                    <div class="searchable-dropdown">
-                        <input type="text" id="trans-sku-search" placeholder="Type to search SKU..." autocomplete="off" required>
-                        <div id="trans-sku-dropdown" class="dropdown-list" style="display: none;">
-                            <!-- SKU options will be populated here -->
-                        </div>
+                    <label>${languageManager.getText('transfer_type')}</label>
+                    <div style="display: flex; gap: 10px; margin: 10px 0;">
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="radio" name="trans-type" value="individual" checked style="margin-right: 5px;">
+                            ${languageManager.getText('individual_components')}
+                        </label>
+                        <label style="display: flex; align-items: center; cursor: pointer;">
+                            <input type="radio" name="trans-type" value="bom" style="margin-right: 5px;">
+                            ${languageManager.getText('bom_assembly_option')}
+                        </label>
                     </div>
-                    <input type="hidden" id="trans-selected-sku" value="">
                 </div>
                 
-                <div class="form-group">
-                    <label for="trans-amount">Amount:</label>
-                    <input type="number" id="trans-amount" min="1" required>
+                <!-- Individual Component Form -->
+                <div id="individual-form" class="trans-form-section">
+                    <div class="form-group">
+                        <label for="trans-sku-search">${languageManager.getText('component_sku')}</label>
+                        <div class="searchable-dropdown">
+                            <input type="text" id="trans-sku-search" placeholder="${languageManager.getText('type_to_search_sku')}" autocomplete="off">
+                            <div id="trans-sku-dropdown" class="dropdown-list" style="display: none;">
+                                <!-- SKU options will be populated here -->
+                            </div>
+                        </div>
+                        <input type="hidden" id="trans-selected-sku" value="">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="trans-amount">${languageManager.getText('amount')}</label>
+                        <input type="number" id="trans-amount" min="1">
+                    </div>
                 </div>
                 
+                <!-- BOM Assembly Form -->
+                <div id="bom-form" class="trans-form-section" style="display: none;">
+                    <div class="form-group">
+                        <label for="trans-bom-search">BOM Assembly:</label>
+                        <div class="searchable-dropdown">
+                            <input type="text" id="trans-bom-search" placeholder="${languageManager.getText('type_to_search_bom')}" autocomplete="off">
+                            <div id="trans-bom-dropdown" class="dropdown-list" style="display: none;">
+                                <!-- BOM options will be populated here -->
+                            </div>
+                        </div>
+                        <input type="hidden" id="trans-selected-bom" value="">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="trans-bom-quantity">Quantity (sets):</label>
+                        <input type="number" id="trans-bom-quantity" min="1" placeholder="How many complete sets?">
+                    </div>
+                    
+                    <div id="bom-expansion-preview" style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0; display: none;">
+                        <h5>Components Required:</h5>
+                        <div id="bom-expansion-list"></div>
+                    </div>
+                </div>
+                
+                <!-- Common destination -->
                 <div class="form-group">
-                    <label for="trans-destination">Send to:</label>
+                    <label for="trans-destination">${languageManager.getText('send_to')}</label>
                     <select id="trans-destination" required>
-                        <option value="">Select destination...</option>
+                        <option value="">${languageManager.getText('select_destination')}</option>
                         ${productionZones.map(zone => 
                             `<option value="production_zone_${zone}">Production Zone ${zone}</option>`
                         ).join('')}
@@ -955,7 +1187,7 @@ function showTransactionForm(container, fromLocation) {
                 </div>
                 
                 <button onclick="createOutgoingTransaction('${fromLocation}')" style="background-color: #2196F3;">
-                    Create Transaction
+                    ${languageManager.getText('create_transaction')}
                 </button>
             </div>
         `;
@@ -964,11 +1196,311 @@ function showTransactionForm(container, fromLocation) {
     container.innerHTML = html;
     container.style.display = 'block';
     
+    // Setup transaction form interactions
+    setupTransactionFormInteractions();
+    
     // Setup searchable dropdown for transaction form if it exists
     if (document.getElementById('trans-sku-search')) {
+        const availableSKUs = getAvailableSKUs();
         setupTransactionDropdown(availableSKUs);
     }
+    
+    // Setup searchable dropdown for BOM selection if it exists
+    if (document.getElementById('trans-bom-search')) {
+        console.log('Setting up BOM autocomplete');
+        const availableBOMs = getBOMDefinitions();
+        setupBOMDropdown(availableBOMs);
+    }
+    
+    // Setup auto-refresh functionality
+    setupTransactionAutoRefresh(container, fromLocation);
 }
+
+// Auto-refresh functionality for transactions
+let transactionRefreshInterval = null;
+
+function setupTransactionAutoRefresh(container, fromLocation) {
+    // Clear any existing interval
+    if (transactionRefreshInterval) {
+        clearInterval(transactionRefreshInterval);
+    }
+    
+    // Only setup refresh for production zones, not logistics
+    if (!fromLocation.startsWith('production_zone_')) {
+        return;
+    }
+    
+    // Manual refresh button
+    const refreshBtn = document.getElementById('refresh-transactions-btn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            console.log('Manual refresh triggered');
+            loadDataFromLocalStorage(); // Reload from storage
+            showTransactionForm(container, fromLocation);
+        });
+    }
+    
+    // Auto-refresh every 10 seconds (only for production)
+    transactionRefreshInterval = setInterval(() => {
+        console.log('Auto-refreshing transactions for', fromLocation);
+        loadDataFromLocalStorage(); // Reload from storage
+        const newPendingCount = getPendingTransactions(fromLocation).length;
+        
+        // Only refresh the display if there are changes
+        const currentPendingElements = container.querySelectorAll('.transaction-card').length;
+        if (newPendingCount !== currentPendingElements) {
+            showTransactionForm(container, fromLocation);
+            console.log('Transaction display updated - found', newPendingCount, 'pending transactions');
+        }
+    }, 10000); // 10 seconds
+    
+    // Clean up interval when leaving the page/section
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList' && 
+                !document.body.contains(container)) {
+                clearInterval(transactionRefreshInterval);
+                observer.disconnect();
+                console.log('Auto-refresh stopped - container removed');
+            }
+        });
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
+
+// Setup searchable dropdown for BOM selection
+function setupBOMDropdown(availableBOMs) {
+    const searchInput = document.getElementById('trans-bom-search');
+    const dropdown = document.getElementById('trans-bom-dropdown');
+    const hiddenInput = document.getElementById('trans-selected-bom');
+    
+    if (!searchInput || !dropdown || !hiddenInput) {
+        console.warn('BOM dropdown elements not found');
+        return;
+    }
+    
+    if (!availableBOMs || Object.keys(availableBOMs).length === 0) {
+        console.warn('No BOM definitions available');
+        return;
+    }
+    
+    // Convert BOM object to array
+    const bomArray = Object.values(availableBOMs);
+    
+    // Create all BOM options
+    function renderDropdown(boms) {
+        dropdown.innerHTML = '';
+        
+        if (boms.length === 0) {
+            dropdown.innerHTML = '<div class="dropdown-item" style="color: #999;">No BOMs found</div>';
+            return;
+        }
+        
+        boms.forEach(bom => {
+            const item = getItemBySKU(Object.keys(bom.components)[0]); // Get first component for preview
+            const componentCount = Object.keys(bom.components).length;
+            
+            const option = document.createElement('div');
+            option.className = 'dropdown-item';
+            option.style.cursor = 'pointer';
+            option.innerHTML = `
+                <div style="font-weight: bold;">${bom.bom_code} - ${bom.name}</div>
+                <div style="font-size: 12px; color: #666;">${componentCount} components</div>
+            `;
+            
+            option.addEventListener('click', function() {
+                searchInput.value = `${bom.bom_code} - ${bom.name}`;
+                hiddenInput.value = bom.bom_code;
+                dropdown.style.display = 'none';
+                
+                // Trigger BOM preview update
+                updateBOMPreview();
+            });
+            
+            dropdown.appendChild(option);
+        });
+    }
+    
+    // Filter BOMs based on search
+    function filterBOMs(searchTerm) {
+        return bomArray.filter(bom => 
+            bom.bom_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            bom.name.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }
+    
+    // Search input event listeners
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value;
+        
+        if (searchTerm.length === 0) {
+            renderDropdown(bomArray);
+            dropdown.style.display = 'block';
+        } else {
+            const filtered = filterBOMs(searchTerm);
+            renderDropdown(filtered);
+            dropdown.style.display = 'block';
+        }
+    });
+    
+    searchInput.addEventListener('focus', function() {
+        renderDropdown(bomArray);
+        dropdown.style.display = 'block';
+    });
+    
+    // Hide dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.style.display = 'none';
+        }
+    });
+    
+    // Clear selection when input is manually cleared
+    searchInput.addEventListener('input', function() {
+        if (this.value === '') {
+            hiddenInput.value = '';
+            // Hide BOM preview
+            const bomPreview = document.getElementById('bom-expansion-preview');
+            if (bomPreview) {
+                bomPreview.style.display = 'none';
+            }
+        }
+    });
+}
+
+// Setup transaction form interactions
+function setupTransactionFormInteractions() {
+    const transTypeRadios = document.querySelectorAll('input[name="trans-type"]');
+    const individualForm = document.getElementById('individual-form');
+    const bomForm = document.getElementById('bom-form');
+    const bomSelect = document.getElementById('trans-selected-bom'); // Hidden input with selected BOM code
+    const bomQuantity = document.getElementById('trans-bom-quantity');
+    const bomPreview = document.getElementById('bom-expansion-preview');
+    const bomExpansionList = document.getElementById('bom-expansion-list');
+    
+    if (!transTypeRadios.length) return; // Not a transaction form
+    
+    // Handle radio button changes
+    transTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'individual') {
+                individualForm.style.display = 'block';
+                bomForm.style.display = 'none';
+                bomPreview.style.display = 'none';
+            } else {
+                individualForm.style.display = 'none';
+                bomForm.style.display = 'block';
+                updateBOMPreview();
+            }
+        });
+    });
+    
+    // Handle BOM selection changes and quantity updates
+    // The BOM preview will be updated when user selects from dropdown or changes quantity
+    if (bomQuantity) {
+        bomQuantity.addEventListener('input', window.updateBOMPreview);
+    }
+    
+    window.updateBOMPreview = function() {
+        const hiddenBomInput = document.getElementById('trans-selected-bom');
+        const bomQuantityInput = document.getElementById('trans-bom-quantity');
+        const bomPreview = document.getElementById('bom-expansion-preview');
+        const bomExpansionList = document.getElementById('bom-expansion-list');
+        
+        const bomCode = hiddenBomInput?.value;
+        const quantity = parseInt(bomQuantityInput?.value) || 0;
+        
+        if (!bomPreview || !bomExpansionList) return;
+        
+        if (!bomCode || !quantity) {
+            bomPreview.style.display = 'none';
+            return;
+        }
+        
+        const bom = getBOMBySKU(bomCode);
+        if (!bom) {
+            bomPreview.style.display = 'none';
+            return;
+        }
+        
+        // Calculate expansion
+        let expansionHTML = '<ul>';
+        Object.entries(bom.components).forEach(([sku, componentQty]) => {
+            const totalQty = componentQty * quantity;
+            const item = getItemBySKU(sku);
+            const itemName = item ? item.name : 'Unknown Component';
+            expansionHTML += `<li><strong>${totalQty}x ${sku}</strong> - ${itemName}</li>`;
+        });
+        expansionHTML += '</ul>';
+        
+        bomExpansionList.innerHTML = expansionHTML;
+        bomPreview.style.display = 'block';
+    }
+}
+
+// Handle BOM group confirmation with single OTP
+window.confirmBOMGroup = async function(bomGroupId) {
+    console.log('Confirming BOM group:', bomGroupId);
+    const bomGroup = getBOMTransactionGroupById(bomGroupId);
+    if (!bomGroup) {
+        await modal.alert('Error', 'BOM group not found');
+        return;
+    }
+    
+    console.log('BOM Group found:', bomGroup);
+    console.log('Component transactions:', bomGroup.component_transactions);
+    
+    // Show OTP input dialog with BOM details
+    const otp = await modal.prompt(
+        'Confirm BOM Receipt', 
+        `Enter single OTP for entire BOM:\n\n${bomGroup.bom_name} (${bomGroup.bom_code})\nQuantity: ${bomGroup.quantity} assembly(s)\n\nThis will confirm all ${bomGroup.component_transactions.length} components.`,
+        'Enter 4-digit OTP'
+    );
+    
+    if (!otp) return;
+    
+    console.log('Entered OTP:', otp, 'Expected OTP:', bomGroup.otp);
+    
+    // Confirm all component transactions with the single OTP
+    let successCount = 0;
+    let failedTransactions = [];
+    let totalComponents = bomGroup.component_transactions.length;
+    
+    for (const transactionId of bomGroup.component_transactions) {
+        console.log('Confirming transaction:', transactionId);
+        const result = confirmTransaction(transactionId, otp);
+        console.log('Result for', transactionId, ':', result);
+        if (result.success) {
+            successCount++;
+        } else {
+            failedTransactions.push({ id: transactionId, reason: result.message });
+        }
+    }
+    
+    console.log('Success count:', successCount, 'Total:', totalComponents);
+    console.log('Failed transactions:', failedTransactions);
+    
+    // Update BOM group status
+    if (successCount === totalComponents) {
+        updateBOMTransactionGroupStatus(bomGroupId, 'completed');
+        await modal.alert('✅ BOM Received!', 
+            `Successfully received:\n${bomGroup.bom_name} (${bomGroup.bom_code})\n\nAll ${totalComponents} components confirmed.`);
+    } else {
+        await modal.alert('⚠️ Partial Success', 
+            `Confirmed ${successCount} of ${totalComponents} components.\n\nSome components may have expired or invalid OTP.`);
+    }
+    
+    // Refresh the current view
+    const currentLocation = window.selectedZone ? `production_zone_${window.selectedZone}` : 'logistics';
+    const currentContainer = document.getElementById('production-transaction-form') || document.getElementById('logistics-transaction-form');
+    if (currentContainer) {
+        showTransactionForm(currentContainer, currentLocation);
+    }
+};
 
 // Handle incoming transaction confirmation
 window.confirmIncomingTransaction = async function(transactionId) {
@@ -1077,46 +1609,133 @@ function setupTransactionDropdown(availableSKUs) {
 
 // Create outgoing transaction
 window.createOutgoingTransaction = async function(fromLocation) {
-    const sku = document.getElementById('trans-selected-sku').value;
-    const amount = document.getElementById('trans-amount').value;
     const destination = document.getElementById('trans-destination').value;
     
-    if (!sku || !amount || !destination) {
-        await modal.alert('Missing Information', 'Please fill all fields before creating transaction.');
+    if (!destination) {
+        await modal.alert('Missing Information', 'Please select a destination.');
         return;
     }
     
-    const transaction = createTransaction(sku, amount, fromLocation, destination);
+    // Check transaction type
+    const transType = document.querySelector('input[name="trans-type"]:checked')?.value;
     
-    // Show different success messages for waste/lost vs regular transactions
-    if (transaction.status === 'auto-approved') {
-        await modal.alert(
-            '✅ Items Disposed!',
-            `Transaction ID: ${transaction.id}\n\nItems sent to ${destination === 'waste' ? 'Waste Bin' : 'Lost Items'} successfully.\n\nNo confirmation needed - transaction completed automatically.`
-        );
+    if (transType === 'bom') {
+        // BOM Transaction  
+        const bomCode = document.getElementById('trans-selected-bom').value;
+        const quantity = document.getElementById('trans-bom-quantity').value;
+        
+        if (!bomCode || !quantity) {
+            await modal.alert('Missing Information', 'Please select BOM assembly and quantity.');
+            return;
+        }
+        
+        try {
+            const bomGroup = createBOMTransactionGroup(bomCode, quantity, fromLocation, destination);
+            
+            // Show BOM transaction success
+            await modal.show({
+                title: '🛠️ BOM Transaction Created!',
+                message: `BOM Group: ${bomGroup.group_id}\nAssembly: ${quantity}x ${bomCode}\n\nExpanded to ${bomGroup.component_transactions.length} component transactions.\n\nShare these OTPs with receivers:`,
+                showCancel: false,
+                confirmText: 'OK',
+                customContent: generateBOMOTPsDisplay(bomGroup)
+            });
+            
+        } catch (error) {
+            await modal.alert('Error', 'Failed to create BOM transaction: ' + error.message);
+            return;
+        }
+        
+        // Clear BOM form
+        const bomSearchInput = document.getElementById('trans-bom-search');
+        const bomHiddenInput = document.getElementById('trans-selected-bom');
+        if (bomSearchInput) bomSearchInput.value = '';
+        if (bomHiddenInput) bomHiddenInput.value = '';
+        document.getElementById('trans-bom-quantity').value = '';
+        document.getElementById('bom-expansion-preview').style.display = 'none';
+        
     } else {
-        // Create a custom modal for OTP display with big font
-        await modal.show({
-            title: '🚀 Transaction Created!',
-            message: `Transaction ID: ${transaction.id}\n\nShare this OTP with the receiver:`,
-            showCancel: false,
-            confirmText: 'OK',
-            customContent: `<div style="text-align: center; margin: 20px 0;">
-                <div style="font-size: 36px; font-weight: bold; color: #4169E1; letter-spacing: 4px; 
-                           padding: 15px; background: #f0f8ff; border-radius: 8px; border: 2px dashed #4169E1;">
-                    ${transaction.otp}
-                </div>
-                <p style="margin-top: 10px; color: #666;">Receiver needs to enter this code</p>
-            </div>`
-        });
+        // Individual Component Transaction (existing logic)
+        const sku = document.getElementById('trans-selected-sku').value;
+        const amount = document.getElementById('trans-amount').value;
+        
+        if (!sku || !amount) {
+            await modal.alert('Missing Information', 'Please select component and amount.');
+            return;
+        }
+        
+        const transaction = createTransaction(sku, amount, fromLocation, destination);
+        
+        // Show different success messages for waste/lost vs regular transactions
+        if (transaction.status === 'auto-approved') {
+            await modal.alert(
+                '✅ Items Disposed!',
+                `Transaction ID: ${transaction.id}\n\nItems sent to ${destination === 'waste' ? 'Waste Bin' : 'Lost Items'} successfully.\n\nNo confirmation needed - transaction completed automatically.`
+            );
+        } else {
+            // Create a custom modal for OTP display with big font
+            await modal.show({
+                title: '🚀 Transaction Created!',
+                message: `Transaction ID: ${transaction.id}\n\nShare this OTP with the receiver:`,
+                showCancel: false,
+                confirmText: 'OK',
+                customContent: `<div style="text-align: center; margin: 20px 0;">
+                    <div style="font-size: 36px; font-weight: bold; color: #4169E1; letter-spacing: 4px; 
+                               padding: 15px; background: #f0f8ff; border-radius: 8px; border: 2px dashed #4169E1;">
+                        ${transaction.otp}
+                    </div>
+                    <p style="margin-top: 10px; color: #666;">Receiver needs to enter this code</p>
+                </div>`
+            });
+        }
+        
+        // Clear individual form
+        document.getElementById('trans-sku-search').value = '';
+        document.getElementById('trans-selected-sku').value = '';
+        document.getElementById('trans-amount').value = '';
     }
     
-    // Clear form
-    document.getElementById('trans-sku-search').value = '';
-    document.getElementById('trans-selected-sku').value = '';
-    document.getElementById('trans-amount').value = '';
+    // Clear destination
     document.getElementById('trans-destination').value = '';
 };
+
+// Generate OTP display for BOM transactions
+function generateBOMOTPsDisplay(bomGroup) {
+    let otpsHTML = '<div style="margin: 20px 0;">';
+    
+    // Show single OTP for entire BOM group at the top
+    otpsHTML += `
+        <div style="margin: 15px 0; padding: 15px; border: 3px solid #4169E1; border-radius: 8px; background-color: #f0f8ff; text-align: center;">
+            <div style="font-size: 18px; font-weight: bold; color: #333; margin-bottom: 10px;">
+                Single OTP for entire BOM:
+            </div>
+            <div style="font-size: 32px; font-weight: bold; color: #4169E1; letter-spacing: 3px;">
+                ${bomGroup.otp}
+            </div>
+        </div>
+    `;
+    
+    // Show all components in the BOM
+    otpsHTML += `<div style="margin: 15px 0;"><strong>${languageManager.getText('components_included')}</strong></div>`;
+    
+    bomGroup.component_transactions.forEach(transId => {
+        const transaction = pendingTransactions.find(t => t.id === transId);
+        if (transaction) {
+            const item = getItemBySKU(transaction.sku);
+            const itemName = item ? item.name : 'Unknown';
+            
+            otpsHTML += `
+                <div style="margin: 5px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px; background-color: #f9f9f9;">
+                    <div style="font-weight: bold;">${transaction.amount}x ${transaction.sku} - ${itemName}</div>
+                    <div style="font-size: 12px; color: #666;">Transaction ID: ${transaction.id}</div>
+                </div>
+            `;
+        }
+    });
+    
+    otpsHTML += '</div>';
+    return otpsHTML;
+}
 
 // Helper function for location display names
 function getLocationDisplayName(location) {
@@ -1368,3 +1987,584 @@ class CustomModal {
 
 // Initialize modal system
 const modal = new CustomModal();
+
+// BOM Management System
+function displayBOMManagement() {
+    const display = document.getElementById('table-display');
+    
+    // Get current BOM status
+    const bomStatus = getBOMStatus();
+    
+    display.innerHTML = `
+        <div class="bom-management">
+            <h3>📁 Item & BOM Management</h3>
+            
+            <!-- Item Catalog Section -->
+            <div class="item-catalog-section" style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h4>📋 Item Catalog Management</h4>
+                <p style="color: #666; margin-bottom: 15px;">Upload master list of components (SKU, Name only)</p>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <input type="file" id="catalog-file-input" accept=".csv" style="display: none;">
+                    <button id="catalog-upload-btn" style="background-color: #28a745; color: white; padding: 10px 20px;">
+                        📁 Upload Item Catalog CSV
+                    </button>
+                    <button id="catalog-export-btn" style="background-color: #17a2b8; color: white; padding: 10px 20px;">
+                        📤 Export Item Catalog
+                    </button>
+                    <span id="catalog-file-name" style="color: #666; font-style: italic;">No file selected</span>
+                </div>
+                <button id="catalog-process-btn" style="background-color: #007bff; color: white; padding: 10px 20px; margin-top: 10px; display: none;">
+                    🔄 Process & Import Catalog
+                </button>
+            </div>
+
+            <!-- BOM Definitions Section -->
+            <div class="bom-definitions-section" style="background: #fff3cd; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h4>🛠️ BOM Definitions Management</h4>
+                <p style="color: #666; margin-bottom: 15px;">Upload assembly recipes (BOM_Code, Component_SKU, Quantity)</p>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <input type="file" id="bom-file-input" accept=".csv" style="display: none;">
+                    <button id="bom-upload-btn" style="background-color: #fd7e14; color: white; padding: 10px 20px;">
+                        📁 Upload BOM Recipes CSV
+                    </button>
+                    <button id="bom-export-btn" style="background-color: #6f42c1; color: white; padding: 10px 20px;">
+                        📤 Export BOM Recipes
+                    </button>
+                    <span id="bom-file-name" style="color: #666; font-style: italic;">No file selected</span>
+                </div>
+                <button id="bom-process-btn" style="background-color: #007bff; color: white; padding: 10px 20px; margin-top: 10px; display: none;">
+                    🔄 Process & Import BOMs
+                </button>
+            </div>
+            
+            <!-- Current Status -->
+            <div class="bom-status" style="background: #e9ecef; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <h4>📊 Current System Status</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <p><strong>Item Catalog:</strong> ${Object.keys(getItemCatalog()).length} components</p>
+                        <p><strong>BOM Definitions:</strong> ${Object.keys(getBOMDefinitions()).length} assemblies</p>
+                        <p><strong>Inventory Items:</strong> ${Object.keys(getInventoryTable()).length} tracked</p>
+                    </div>
+                    <div>
+                        <p><strong>Transaction Groups:</strong> ${getBOMTransactionGroups().length} BOM transfers</p>
+                        <p><strong>Data Source:</strong> ${bomStatus.source}</p>
+                        <p><strong>Last Updated:</strong> ${bomStatus.lastUpdated}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Preview/Current Data -->
+            <div id="bom-preview" style="margin-top: 20px;">
+                ${generateCurrentBOMTable()}
+            </div>
+        </div>
+    `;
+    
+    // Set up event listeners
+    setupBOMEventListeners();
+}
+
+function getBOMStatus() {
+    const itemTableKeys = Object.keys(getItemTable());
+    const bomData = localStorage.getItem('berjaya_bom_metadata');
+    
+    if (bomData) {
+        const metadata = JSON.parse(bomData);
+        return {
+            totalSKUs: itemTableKeys.length,
+            source: metadata.filename || 'CSV Import',
+            lastUpdated: metadata.uploadedAt ? new Date(metadata.uploadedAt).toLocaleString() : 'Unknown'
+        };
+    } else {
+        return {
+            totalSKUs: itemTableKeys.length,
+            source: 'Hardcoded (Development)',
+            lastUpdated: 'Never (Using default data)'
+        };
+    }
+}
+
+function generateCurrentBOMTable() {
+    const itemTable = getItemTable();
+    const items = Object.values(itemTable).slice(0, 10); // Show first 10 items
+    
+    if (items.length === 0) {
+        return '<p>No BOM data available</p>';
+    }
+    
+    let html = `
+        <h4>Current Items Preview (First 10)</h4>
+        <table class="item-table">
+            <thead>
+                <tr>
+                    <th>SKU</th>
+                    <th>Name</th>
+                    <th>Logistics</th>
+                    <th>Production Total</th>
+                    <th>Total Amount</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+    
+    items.forEach(item => {
+        let productionTotal = 0;
+        for (let i = 1; i <= 30; i++) {
+            productionTotal += item[`amount_production_zone_${i}`] || 0;
+        }
+        
+        html += `
+            <tr>
+                <td><strong>${item.sku}</strong></td>
+                <td>${item.name}</td>
+                <td>${item.amount_logistics || 0}</td>
+                <td>${productionTotal}</td>
+                <td><strong>${(item.amount_logistics || 0) + productionTotal}</strong></td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table>';
+    
+    if (Object.keys(itemTable).length > 10) {
+        html += `<p style="margin-top: 10px; color: #666; font-style: italic;">
+            Showing 10 of ${Object.keys(itemTable).length} total items
+        </p>`;
+    }
+    
+    return html;
+}
+
+function setupBOMEventListeners() {
+    // Item Catalog handlers
+    setupCatalogEventListeners();
+    
+    // BOM Definitions handlers
+    setupBOMDefinitionsEventListeners();
+}
+
+function setupCatalogEventListeners() {
+    const catalogFileInput = document.getElementById('catalog-file-input');
+    const catalogUploadBtn = document.getElementById('catalog-upload-btn');
+    const catalogExportBtn = document.getElementById('catalog-export-btn');
+    const catalogProcessBtn = document.getElementById('catalog-process-btn');
+    const catalogFileName = document.getElementById('catalog-file-name');
+    
+    let selectedCatalogFile = null;
+    
+    // File selection
+    catalogUploadBtn.addEventListener('click', () => {
+        catalogFileInput.click();
+    });
+    
+    catalogFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file && file.type === 'text/csv') {
+            selectedCatalogFile = file;
+            catalogFileName.textContent = file.name;
+            catalogProcessBtn.style.display = 'block';
+        } else {
+            selectedCatalogFile = null;
+            catalogFileName.textContent = 'Please select a valid CSV file';
+            catalogProcessBtn.style.display = 'none';
+        }
+    });
+    
+    // Process catalog CSV
+    catalogProcessBtn.addEventListener('click', async () => {
+        if (!selectedCatalogFile) return;
+        
+        try {
+            await processCatalogCSVFile(selectedCatalogFile);
+        } catch (error) {
+            console.error('Error processing catalog CSV:', error);
+            await modal.alert('Error', 'Failed to process catalog CSV: ' + error.message);
+        }
+    });
+    
+    // Export catalog
+    catalogExportBtn.addEventListener('click', async () => {
+        try {
+            await exportItemCatalog();
+        } catch (error) {
+            console.error('Error exporting catalog:', error);
+            await modal.alert('Error', 'Failed to export catalog: ' + error.message);
+        }
+    });
+}
+
+function setupBOMDefinitionsEventListeners() {
+    const bomFileInput = document.getElementById('bom-file-input');
+    const bomUploadBtn = document.getElementById('bom-upload-btn');
+    const bomExportBtn = document.getElementById('bom-export-btn');
+    const bomProcessBtn = document.getElementById('bom-process-btn');
+    const bomFileName = document.getElementById('bom-file-name');
+    
+    let selectedBOMFile = null;
+    
+    // File selection
+    bomUploadBtn.addEventListener('click', () => {
+        bomFileInput.click();
+    });
+    
+    bomFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file && file.type === 'text/csv') {
+            selectedBOMFile = file;
+            bomFileName.textContent = file.name;
+            bomProcessBtn.style.display = 'block';
+        } else {
+            selectedBOMFile = null;
+            bomFileName.textContent = 'Please select a valid CSV file';
+            bomProcessBtn.style.display = 'none';
+        }
+    });
+    
+    // Process BOM CSV
+    bomProcessBtn.addEventListener('click', async () => {
+        if (!selectedBOMFile) return;
+        
+        try {
+            await processBOMDefinitionsCSVFile(selectedBOMFile);
+        } catch (error) {
+            console.error('Error processing BOM definitions CSV:', error);
+            await modal.alert('Error', 'Failed to process BOM definitions CSV: ' + error.message);
+        }
+    });
+    
+    // Export BOM definitions
+    bomExportBtn.addEventListener('click', async () => {
+        try {
+            await exportBOMDefinitions();
+        } catch (error) {
+            console.error('Error exporting BOM definitions:', error);
+            await modal.alert('Error', 'Failed to export BOM definitions: ' + error.message);
+        }
+    });
+}
+
+// Process Item Catalog CSV (SKU, Name only)
+async function processCatalogCSVFile(file) {
+    return new Promise((resolve, reject) => {
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: async function(results) {
+                try {
+                    // Validate and convert catalog CSV data
+                    const catalogData = await validateAndConvertCatalogCSV(results.data);
+                    
+                    // Show preview and confirm
+                    const confirmed = await showCatalogPreview(catalogData, file.name);
+                    
+                    if (confirmed) {
+                        // Save catalog data
+                        await saveCatalogData(catalogData, file.name);
+                        
+                        await modal.alert(
+                            '✅ Catalog Import Success!', 
+                            `Successfully imported ${Object.keys(catalogData).length} items from ${file.name}`
+                        );
+                        
+                        // Refresh the BOM display
+                        displayBOMManagement();
+                    }
+                    
+                    resolve(catalogData);
+                } catch (error) {
+                    reject(error);
+                }
+            },
+            error: function(error) {
+                reject(new Error('CSV parsing failed: ' + error.message));
+            }
+        });
+    });
+}
+
+// Process BOM Definitions CSV (BOM_Code, Component_SKU, Quantity)
+async function processBOMDefinitionsCSVFile(file) {
+    return new Promise((resolve, reject) => {
+        Papa.parse(file, {
+            header: true,
+            skipEmptyLines: true,
+            complete: async function(results) {
+                try {
+                    // Validate and convert BOM definitions CSV data
+                    const bomDefsData = await validateAndConvertBOMDefinitionsCSV(results.data);
+                    
+                    // Show preview and confirm
+                    const confirmed = await showBOMDefinitionsPreview(bomDefsData, file.name);
+                    
+                    if (confirmed) {
+                        // Save BOM definitions data
+                        await saveBOMDefinitionsData(bomDefsData, file.name);
+                        
+                        await modal.alert(
+                            '✅ BOM Definitions Import Success!', 
+                            `Successfully imported ${Object.keys(bomDefsData).length} BOMs from ${file.name}`
+                        );
+                        
+                        // Refresh the BOM display
+                        displayBOMManagement();
+                    }
+                    
+                    resolve(bomDefsData);
+                } catch (error) {
+                    reject(error);
+                }
+            },
+            error: function(error) {
+                reject(new Error('CSV parsing failed: ' + error.message));
+            }
+        });
+    });
+}
+
+// Validate Item Catalog CSV
+async function validateAndConvertCatalogCSV(csvData) {
+    if (!csvData || csvData.length === 0) {
+        throw new Error('CSV file is empty');
+    }
+    
+    const firstRow = csvData[0];
+    const requiredColumns = ['SKU', 'Name'];
+    const missingColumns = requiredColumns.filter(col => !(col in firstRow));
+    
+    if (missingColumns.length > 0) {
+        throw new Error(`Missing required columns: ${missingColumns.join(', ')}`);
+    }
+    
+    const catalogData = {};
+    
+    csvData.forEach((row, index) => {
+        const sku = row.SKU?.trim();
+        const name = row.Name?.trim();
+        
+        if (!sku || !name) {
+            console.warn(`Skipping row ${index + 1}: missing SKU or Name`);
+            return;
+        }
+        
+        catalogData[sku] = {
+            sku: sku,
+            name: name
+        };
+    });
+    
+    if (Object.keys(catalogData).length === 0) {
+        throw new Error('No valid items found in CSV');
+    }
+    
+    return catalogData;
+}
+
+// Validate BOM Definitions CSV  
+async function validateAndConvertBOMDefinitionsCSV(csvData) {
+    if (!csvData || csvData.length === 0) {
+        throw new Error('CSV file is empty');
+    }
+    
+    const firstRow = csvData[0];
+    const requiredColumns = ['BOM_Code', 'Component_SKU', 'Quantity'];
+    const missingColumns = requiredColumns.filter(col => !(col in firstRow));
+    
+    if (missingColumns.length > 0) {
+        throw new Error(`Missing required columns: ${missingColumns.join(', ')}`);
+    }
+    
+    const bomData = {};
+    
+    csvData.forEach((row, index) => {
+        const bomCode = row.BOM_Code?.trim();
+        const componentSku = row.Component_SKU?.trim();
+        const quantity = parseInt(row.Quantity);
+        const bomName = row.BOM_Name?.trim() || bomCode;
+        
+        if (!bomCode || !componentSku || !quantity) {
+            console.warn(`Skipping row ${index + 1}: missing required data`);
+            return;
+        }
+        
+        // Initialize BOM if doesn't exist
+        if (!bomData[bomCode]) {
+            bomData[bomCode] = {
+                bom_code: bomCode,
+                name: bomName,
+                components: {}
+            };
+        }
+        
+        // Add component to BOM
+        bomData[bomCode].components[componentSku] = quantity;
+    });
+    
+    if (Object.keys(bomData).length === 0) {
+        throw new Error('No valid BOM definitions found in CSV');
+    }
+    
+    return bomData;
+}
+
+// Show preview functions
+async function showCatalogPreview(catalogData, filename) {
+    const itemCount = Object.keys(catalogData).length;
+    const sampleItems = Object.values(catalogData).slice(0, 5);
+    
+    let previewText = sampleItems.map(item => `${item.sku} - ${item.name}`).join('\n');
+    
+    return await modal.confirm(
+        '📋 Confirm Catalog Import',
+        `Ready to import ${itemCount} components from "${filename}"?\n\nPreview (first 5):\n${previewText}` +
+        (itemCount > 5 ? `\n\n+ ${itemCount - 5} more items...` : '')
+    );
+}
+
+async function showBOMDefinitionsPreview(bomData, filename) {
+    const bomCount = Object.keys(bomData).length;
+    const sampleBOMs = Object.values(bomData).slice(0, 3);
+    
+    let previewText = sampleBOMs.map(bom => {
+        const componentList = Object.entries(bom.components).map(([sku, qty]) => `${qty}x ${sku}`).join(', ');
+        return `${bom.bom_code}: ${componentList}`;
+    }).join('\n\n');
+    
+    return await modal.confirm(
+        '🛠️ Confirm BOM Import',
+        `Ready to import ${bomCount} BOMs from "${filename}"?\n\nPreview (first 3):\n\n${previewText}` +
+        (bomCount > 3 ? `\n\n+ ${bomCount - 3} more BOMs...` : '')
+    );
+}
+
+// Save functions with adapter pattern
+async function saveCatalogData(catalogData, filename) {
+    if (typeof saveToFirestore === 'function') {
+        // Firebase version (when implemented)
+        await saveCatalogToFirestore(catalogData, filename);
+    } else {
+        // Local storage version
+        await saveCatalogToLocalStorage(catalogData, filename);
+    }
+}
+
+async function saveBOMDefinitionsData(bomData, filename) {
+    if (typeof saveToFirestore === 'function') {
+        // Firebase version (when implemented)
+        await saveBOMDefinitionsToFirestore(bomData, filename);
+    } else {
+        // Local storage version
+        await saveBOMDefinitionsToLocalStorage(bomData, filename);
+    }
+}
+
+async function saveCatalogToLocalStorage(catalogData, filename) {
+    // Replace item catalog
+    itemCatalog = catalogData;
+    
+    // Create default inventory entries for new items
+    Object.keys(catalogData).forEach(sku => {
+        if (!inventoryTable[sku]) {
+            inventoryTable[sku] = {
+                sku: sku,
+                total_amount: 0,
+                amount_logistics: 0,
+                ...Object.fromEntries(
+                    Array.from({length: 30}, (_, i) => [`amount_production_zone_${i + 1}`, 0])
+                )
+            };
+        }
+    });
+    
+    // Rebuild legacy itemTable
+    rebuildLegacyItemTable();
+    
+    // Save metadata
+    const metadata = {
+        filename: filename,
+        uploadedAt: new Date().toISOString(),
+        itemCount: Object.keys(catalogData).length,
+        type: 'catalog'
+    };
+    localStorage.setItem('berjaya_catalog_metadata', JSON.stringify(metadata));
+    
+    // Save all data
+    saveDataToLocalStorage();
+    console.log(`Item catalog saved: ${Object.keys(catalogData).length} items from ${filename}`);
+}
+
+async function saveBOMDefinitionsToLocalStorage(bomData, filename) {
+    // Replace BOM definitions
+    bomDefinitions = bomData;
+    
+    // Save metadata
+    const metadata = {
+        filename: filename,
+        uploadedAt: new Date().toISOString(),
+        bomCount: Object.keys(bomData).length,
+        type: 'bom_definitions'
+    };
+    localStorage.setItem('berjaya_bom_metadata', JSON.stringify(metadata));
+    
+    // Save all data
+    saveDataToLocalStorage();
+    console.log(`BOM definitions saved: ${Object.keys(bomData).length} BOMs from ${filename}`);
+}
+
+// Export functions
+async function exportItemCatalog() {
+    const catalog = getItemCatalog();
+    const csvContent = 'SKU,Name\n' + 
+        Object.values(catalog).map(item => `${item.sku},${item.name}`).join('\n');
+    
+    downloadCSV(csvContent, 'item_catalog.csv');
+}
+
+async function exportBOMDefinitions() {
+    const boms = getBOMDefinitions();
+    const csvContent = 'BOM_Code,Component_SKU,Quantity,BOM_Name\n' + 
+        Object.values(boms).flatMap(bom => 
+            Object.entries(bom.components).map(([sku, qty]) => 
+                `${bom.bom_code},${sku},${qty},${bom.name}`
+            )
+        ).join('\n');
+    
+    downloadCSV(csvContent, 'bom_definitions.csv');
+}
+
+function downloadCSV(content, filename) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+async function saveToLocalStorage(bomData, filename) {
+    // Save the BOM data as the new itemTable
+    itemTable = bomData;
+    
+    // Update all three tables with new BOM data
+    yesterdayResultTable = JSON.parse(JSON.stringify(bomData));
+    transactionItemTable = JSON.parse(JSON.stringify(bomData));
+    // Keep checkedItemTable as is (worker counts)
+    
+    // Save to localStorage
+    localStorage.setItem('berjaya_item_table', JSON.stringify(itemTable));
+    localStorage.setItem('berjaya_yesterday_table', JSON.stringify(yesterdayResultTable));
+    localStorage.setItem('berjaya_transaction_table', JSON.stringify(transactionItemTable));
+    
+    // Save BOM metadata
+    const metadata = {
+        filename: filename,
+        uploadedAt: new Date().toISOString(),
+        itemCount: Object.keys(bomData).length
+    };
+    localStorage.setItem('berjaya_bom_metadata', JSON.stringify(metadata));
+    
+    console.log(`BOM data saved: ${Object.keys(bomData).length} items from ${filename}`);
+}

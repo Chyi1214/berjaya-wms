@@ -28,6 +28,9 @@
         <button id="menu-toggle" class="menu-toggle" aria-label="Open menu">
             ☰
         </button>
+        <button id="home-btn" class="menu-toggle" aria-label="Go to role selection" style="display: none;">
+            🏠
+        </button>
         <h1 data-lang="header_title">Berjaya Warehouse Management</h1>
         <!-- h1 = biggest heading -->
         <p data-lang="header_subtitle">Welcome to the inventory counting system</p>
@@ -168,6 +171,7 @@
                         <option value="checked">✅ Checked Items</option>
                         <option value="transaction">🔄 Transaction Table</option>
                         <option value="logs">📝 Transaction Logs</option>
+                        <option value="bom">📁 BOM Management</option>
                     </select>
                     
                     <button id="refresh-dashboard-btn" data-lang="refresh_table" style="padding: 8px 12px;">🔄 Refresh</button>
@@ -204,6 +208,9 @@
     
     <!-- Our Firebase configuration (commented out for local development) -->
     <!-- <script src="firebase-config.js"></script> -->
+    
+    <!-- CSV parsing library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
     <!-- Language support -->
     <script src="languages.js"></script>

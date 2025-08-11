@@ -66,8 +66,9 @@ users/
   └── preferred_role: "logistics" or "production" or "manager"
 ```
 
-### Version 1.0.0 Hardcoded Data
-- **SKUs**: ["a001", "a002", "b003", "b004"]
+### Version 2.1.0 Sample Data
+- **SKUs**: 15 components (A001-A003, B001-B003, C001-C003, D001-D003, E001-E003)
+- **BOMs**: 3 assemblies (TK1: Wheel Assembly Kit, TK2: Brake System Kit, TK3: Electronics Package)
 - **Locations**: "logistics" + "production_zone_1" through "production_zone_30"
 
 ## Development Commands
@@ -92,26 +93,40 @@ This project currently has no build system - it uses vanilla HTML/CSS/JavaScript
 - Needs clear explanations and step-by-step guidance
 - Will be sole maintainer of the system
 
-### Current Status - Version 1.0.0 ✅ COMPLETED (Aug 7, 2025)
-- **✅ Completed**: Full local simulation working perfectly
-- **✅ Tested**: Mobile interface on iPhone, desktop on Mac
-- **✅ Working Features**:
-  1. Test login system (bypasses Firebase for development)
-  2. Role selection screen (Logistics/Production/Manager) 
-  3. SKU dropdown with hardcoded values (a001, a002, b003, b004)
-  4. Logistics counting workflow with visual feedback
-  5. Production zone selection (1-30) and counting
-  6. Manager view with real-time Item Table display
-  7. Complete navigation with "Go Back" buttons
-  8. Data persistence via localStorage
-  9. Mobile-responsive design tested on actual devices
+### Current Status - Version 2.1.0 ✅ COMPLETED (Aug 11, 2025)
+- **✅ Version 1.0.0**: Full local simulation with basic counting system
+- **✅ Version 2.0.0**: Advanced transaction system with OTP confirmations  
+- **✅ Version 2.1.0**: Complete BOM (Bill of Materials) assembly management system
 
-### Implementation Notes (Aug 7, 2025)
-- **Local Development Approach**: Commented out Firebase, created `local-data.js` simulation
-- **File Structure**: `app-local.js` for development, original `app.js` preserved for Firebase migration
-- **Data Sync**: Each browser/device has separate localStorage (expected behavior for local dev)
-- **Mobile Testing**: Successfully tested on iPhone via local network (192.168.0.x:8000)
-- **User Workflow**: Matches exactly with Eugene's vision in `Eugene_note.md`
+### Version 2.1.0 Features (Aug 11, 2025):
+1. **BOM Assembly Management**: 
+   - Complete CSV upload/download for item catalogs and BOM definitions
+   - BOM transactions that expand to individual component transfers
+   - Single OTP confirmation for entire BOM assemblies
+2. **Enhanced Manager Dashboard**:
+   - Three-table system (Yesterday/Checked/Transaction comparison)
+   - BOM management interface with upload/download capabilities
+   - Data reset and day finalization functions
+3. **Improved Production Workflow**:
+   - BOM assemblies appear as single consolidated boxes
+   - Auto-refresh system (10-second intervals + manual refresh button)
+   - Production workers can ONLY receive (no outgoing transactions)
+4. **Transaction System**:
+   - OTP-based confirmations for all transfers
+   - Waste/Lost item tracking with auto-approval
+   - Real-time transaction monitoring and audit trail
+5. **Data Architecture**:
+   - Separated item catalog from inventory quantities
+   - BOM definitions with component expansion logic
+   - Comprehensive CSV import/export with PapaParse library
+
+### Implementation Notes (Aug 11, 2025)
+- **Local Development Approach**: Fully functional system using localStorage
+- **File Structure**: Enhanced `app-local.js`, `local-data.js` for development
+- **BOM System**: Complete assembly management with single OTP workflow
+- **Auto-Refresh**: Production workers see new transactions within 10 seconds
+- **Mobile Testing**: All features tested and working on mobile devices
+- **Data Management**: 15 components (A001-E003), 3 BOMs (TK1, TK2, TK3) with sample data
 
 ### Code Style Notes
 - Extensive comments throughout for educational purposes
@@ -133,18 +148,24 @@ This project currently has no build system - it uses vanilla HTML/CSS/JavaScript
 - **Advanced Item Table**: Historical comparison, discrepancy detection
 - **React Migration**: Planned for better mobile UX and component reusability
 
-### Development Learnings (Aug 7, 2025)
+### Development Learnings (Aug 7-11, 2025)
 - **Local simulation approach works excellently** for rapid prototyping
 - **Mobile-first design crucial** - iPhone testing revealed true user experience
-- **Eugene's simple vision translated perfectly** into working system
+- **BOM system complexity handled elegantly** with single OTP and grouped displays
+- **Auto-refresh solves real-world sync issues** in localStorage-based systems
 - **localStorage per-browser separation helps multi-role testing**
 - **Clear file organization** (local vs Firebase versions) enables smooth migration path
+- **JavaScript syntax errors can break entire application** - proper debugging essential
+- **User feedback drives feature refinement** - production workflow improvements based on testing
 
 ### Testing Strategy
 - Manual testing on mobile devices is critical
 - Test authentication flow thoroughly
 - Validate mobile responsiveness across devices
-- Test CSV import/export workflows when implemented
+- Test CSV import/export workflows (✅ implemented and working)
+- Test BOM transaction flow end-to-end (Logistics → Production)
+- Verify auto-refresh functionality across different zones
+- Test data reset and synchronization features
 
 ## Maintenance Notes
 

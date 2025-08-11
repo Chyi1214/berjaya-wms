@@ -39,6 +39,11 @@ header p {
     opacity: 0.9;                   /* Slightly transparent */
 }
 
+/* Home button - uses same styles as menu button */
+#home-btn {
+    left: 4rem;                     /* Position next to menu button */
+}
+
 /* Main content area */
 main {
     flex: 1;                        /* Take up remaining space */
@@ -492,16 +497,50 @@ footer {
     background: #218838;
 }
 
-/* Zone selection styles */
+/* Zone selection styles - bigger window */
 #zone-selection {
     text-align: center;             /* Center zone selection */
-    padding: 2rem;                  /* Space around */
+    padding: 3rem 2rem;             /* More padding for bigger window */
+    background-color: white;        /* White background */
+    border-radius: 12px;            /* Rounded corners */
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1); /* Subtle shadow */
+    margin: 2rem auto;              /* Center on page with margin */
+    max-width: 500px;               /* Limit maximum width */
+    min-height: 300px;              /* Minimum height for bigger appearance */
+    display: flex;                  /* Flexbox layout */
+    flex-direction: column;         /* Stack elements vertically */
+    justify-content: center;        /* Center content vertically */
+    align-items: center;            /* Center content horizontally */
+}
+
+#zone-selection h2 {
+    font-size: 2rem;                /* Bigger title */
+    margin-bottom: 2rem;            /* More space below title */
+    color: #2c5aa0;                 /* Match theme color */
+}
+
+#zone-selection label {
+    font-size: 1.2rem;              /* Bigger label text */
+    margin-bottom: 1rem;            /* Space below label */
+    display: block;                 /* Block display */
+    font-weight: bold;              /* Bold text */
 }
 
 #zone-input {
-    max-width: 200px;               /* Limit width of zone input */
-    margin: 1rem auto;              /* Center and space around */
-    display: block;                 /* Block display for centering */
+    width: 200px;                   /* Fixed width */
+    height: 60px;                   /* Taller input field */
+    font-size: 1.5rem;              /* Bigger text inside input */
+    text-align: center;             /* Center the numbers */
+    margin: 1rem 0;                 /* Space above and below */
+    border: 3px solid #2c5aa0;      /* Thicker, colored border */
+    border-radius: 8px;             /* Rounded corners */
+}
+
+#zone-selection button {
+    font-size: 1.2rem;              /* Bigger button text */
+    padding: 15px 30px;             /* Bigger button padding */
+    margin-top: 1.5rem;             /* More space above button */
+    min-height: 50px;               /* Taller button */
 }
 
 /* Status messages */

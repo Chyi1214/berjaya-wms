@@ -75,7 +75,45 @@ const LANGUAGES = {
             'zone_error': 'Please enter a valid zone number between 1 and 30',
             'change_zone': 'Change Zone',
             'current_inventory_status': 'Current Inventory Status',
-            'last_updated': 'Last updated:'
+            'last_updated': 'Last updated:',
+            
+            // Transaction related
+            'transaction_title': 'Transaction',
+            'incoming_transactions': 'Incoming Transactions',
+            'components_included': 'Components included:',
+            'confirm_receipt': 'Confirm Receipt',
+            'confirm_bom_receipt': 'Confirm BOM Receipt',
+            'bom_assembly': 'BOM Assembly:',
+            'from_location': 'From:',
+            'sender': 'Sender:',
+            'quantity': 'Quantity:',
+            'assemblies': 'assembly(s)',
+            'refresh_transactions': 'Refresh Transactions',
+            'auto_refresh_status': 'Auto-refresh: ON (every 10s)',
+            
+            // BOM Management
+            'bom_management': 'BOM Management',
+            'upload_item_catalog': 'Upload Item Catalog',
+            'download_item_catalog': 'Download Item Catalog', 
+            'upload_bom_definitions': 'Upload BOM Definitions',
+            'download_bom_definitions': 'Download BOM Definitions',
+            
+            // Transaction Form
+            'send_items': 'Send Items',
+            'transfer_type': 'Transfer Type:',
+            'individual_components': 'Individual Components', 
+            'bom_assembly_option': 'BOM Assembly',
+            'component_sku': 'Component SKU:',
+            'type_to_search_sku': 'Type to search SKU...',
+            'type_to_search_bom': 'Type to search BOM...',
+            'amount': 'Amount:',
+            'send_to': 'Send to:',
+            'select_destination': 'Select destination...',
+            'create_transaction': 'Create Transaction',
+            
+            // Button labels
+            'transaction': 'Transaction',
+            'check_inventory': 'Check Inventory'
         }
     },
     
@@ -152,7 +190,45 @@ const LANGUAGES = {
             'zone_error': '請輸入 1 到 30 之間的有效區域號碼',
             'change_zone': '更改區域',
             'current_inventory_status': '目前庫存狀態',
-            'last_updated': '最後更新：'
+            'last_updated': '最後更新：',
+            
+            // Transaction related
+            'transaction_title': '交易',
+            'incoming_transactions': '傳入交易',
+            'components_included': '包含組件：',
+            'confirm_receipt': '確認收貨',
+            'confirm_bom_receipt': '確認 BOM 收貨',
+            'bom_assembly': 'BOM 組裝：',
+            'from_location': '來自：',
+            'sender': '發送者：',
+            'quantity': '數量：',
+            'assemblies': '組裝',
+            'refresh_transactions': '刷新交易',
+            'auto_refresh_status': '自動刷新：開啟（每10秒）',
+            
+            // BOM Management
+            'bom_management': 'BOM 管理',
+            'upload_item_catalog': '上傳物品目錄',
+            'download_item_catalog': '下載物品目錄',
+            'upload_bom_definitions': '上傳 BOM 定義',
+            'download_bom_definitions': '下載 BOM 定義',
+            
+            // Transaction Form
+            'send_items': '發送物品',
+            'transfer_type': '轉移類型：',
+            'individual_components': '個別組件',
+            'bom_assembly_option': 'BOM 組裝',
+            'component_sku': '組件 SKU：',
+            'type_to_search_sku': '輸入搜尋 SKU...',
+            'type_to_search_bom': '輸入搜尋 BOM...',
+            'amount': '數量：',
+            'send_to': '發送至：',
+            'select_destination': '選擇目的地...',
+            'create_transaction': '建立交易',
+            
+            // Button labels
+            'transaction': '交易',
+            'check_inventory': '檢查庫存'
         }
     },
     
@@ -229,7 +305,28 @@ const LANGUAGES = {
             'zone_error': 'ကျေးဇူးပြု၍ ၁ မှ ၃၀ အတွင်း မှန်ကန်သော ဇုန်နံပါတ် ထည့်ပါ',
             'change_zone': 'ဇုန်ပြောင်းရန်',
             'current_inventory_status': 'လက်ရှိ စာရင်းအခြေအနေ',
-            'last_updated': 'နောက်ဆုံးပြင်ခဲ့သည်：'
+            'last_updated': 'နောက်ဆုံးပြင်ခဲ့သည်：',
+            
+            // Transaction related
+            'transaction_title': 'ငွေရေးကြေးရေး',
+            'incoming_transactions': 'လာရောက်သည့်ငွေပေးငွေယူများ',
+            'components_included': 'ပါဝင်သောအစိတ်အပိုင်းများ：',
+            'confirm_receipt': 'ရရှိကြောင်းအတည်ပြုပါ',
+            'confirm_bom_receipt': 'BOM ရရှိကြောင်းအတည်ပြုပါ',
+            'bom_assembly': 'BOM တပ်ဆင်ခြင်း：',
+            'from_location': 'မှ：',
+            'sender': 'ပို့သူ：',
+            'quantity': 'အရေအတွက်：',
+            'assemblies': 'တပ်ဆင်မှု',
+            'refresh_transactions': 'ငွေပေးငွေယူများ ပြန်လည်ဖတ်ခြင်း',
+            'auto_refresh_status': 'အလိုအလျောက်ပြန်လည်ဖတ်ခြင်း: ဖွင့် (၁၀စက္ကန့်တိုင်း)',
+            
+            // BOM Management  
+            'bom_management': 'BOM စီမံခန့်ခွဲမှု',
+            'upload_item_catalog': 'ပစ္စည်းစာရင်းတင်ပါ',
+            'download_item_catalog': 'ပစ္စည်းစာရင်းဒေါင်းလုဒ်လုပ်ပါ',
+            'upload_bom_definitions': 'BOM အဓိပ္ပာယ်တင်ပါ',
+            'download_bom_definitions': 'BOM အဓိပ္ပာယ်ဒေါင်းလုဒ်လုပ်ပါ'
         }
     },
     
@@ -306,7 +403,45 @@ const LANGUAGES = {
             'zone_error': 'দয়া করে ১ থেকে ৩০ এর মধ্যে একটি বৈধ জোন নম্বর লিখুন',
             'change_zone': 'জোন পরিবর্তন',
             'current_inventory_status': 'বর্তমান ইনভেন্টরি অবস্থা',
-            'last_updated': 'সর্বশেষ আপডেট:'
+            'last_updated': 'সর্বশেষ আপডেট:',
+            
+            // Transaction related
+            'transaction_title': 'লেনদেন',
+            'incoming_transactions': 'আগত লেনদেন',
+            'components_included': 'অন্তর্ভুক্ত উপাদান:',
+            'confirm_receipt': 'প্রাপ্তি নিশ্চিত করুন',
+            'confirm_bom_receipt': 'BOM প্রাপ্তি নিশ্চিত করুন',
+            'bom_assembly': 'BOM সমাবেশ:',
+            'from_location': 'থেকে:',
+            'sender': 'প্রেরক:',
+            'quantity': 'পরিমাণ:',
+            'assemblies': 'সমাবেশ',
+            'refresh_transactions': 'লেনদেন রিফ্রেশ',
+            'auto_refresh_status': 'স্বয়ংক্রিয় রিফ্রেশ: চালু (প্রতি ১০ সেকেন্ড)',
+            
+            // BOM Management
+            'bom_management': 'BOM ব্যবস্থাপনা',
+            'upload_item_catalog': 'আইটেম ক্যাটালগ আপলোড',
+            'download_item_catalog': 'আইটেম ক্যাটালগ ডাউনলোড',
+            'upload_bom_definitions': 'BOM সংজ্ঞা আপলোড',
+            'download_bom_definitions': 'BOM সংজ্ঞা ডাউনলোড',
+            
+            // Transaction Form  
+            'send_items': 'আইটেম পাঠান',
+            'transfer_type': 'স্থানান্তরের ধরন:',
+            'individual_components': 'স্বতন্ত্র উপাদান',
+            'bom_assembly_option': 'BOM সমাবেশ',
+            'component_sku': 'উপাদান SKU:',
+            'type_to_search_sku': 'SKU খুঁজতে টাইপ করুন...',
+            'type_to_search_bom': 'BOM খুঁজতে টাইপ করুন...',
+            'amount': 'পরিমাণ:',
+            'send_to': 'পাঠান:',
+            'select_destination': 'গন্তব্য নির্বাচন...',
+            'create_transaction': 'লেনদেন তৈরি',
+            
+            // Button labels
+            'transaction': 'লেনদেন',
+            'check_inventory': 'ইনভেন্টরি চেক'
         }
     },
     

@@ -1,75 +1,90 @@
 // Local data simulation for development
 // This will be replaced with Firebase later
 
-// Mock Item Table - this represents the inventory database
-let itemTable = {
-    "a001": {
-        sku: "a001",
-        name: "Component A001",
-        total_amount: 100,
-        amount_logistics: 25,
-        amount_production_zone_1: 10,
-        amount_production_zone_2: 15,
-        amount_production_zone_3: 8,
-        // Initialize all production zones to 0
-        ...Object.fromEntries(
-            Array.from({length: 30}, (_, i) => [`amount_production_zone_${i + 1}`, 0])
-        )
+// NEW ARCHITECTURE: Separate Item Catalog from Inventory
+
+// Item Catalog - Master list of all components (SKU + Name only)
+let itemCatalog = {
+    "a001": { sku: "a001", name: "Bolt M8x20 Steel" },
+    "a002": { sku: "a002", name: "Washer M8 Zinc" },
+    "a003": { sku: "a003", name: "Nut M8 Steel" },
+    "b001": { sku: "b001", name: "Spring Coil Heavy Duty" },
+    "b002": { sku: "b002", name: "Rubber Gasket Large" },
+    "b003": { sku: "b003", name: "Metal Bracket L-Type" },
+    "c001": { sku: "c001", name: "Wire Harness Main" },
+    "c002": { sku: "c002", name: "Connector 4-Pin" },
+    "c003": { sku: "c003", name: "Relay 12V 30A" },
+    "d001": { sku: "d001", name: "Filter Oil Primary" },
+    "d002": { sku: "d002", name: "Filter Air Secondary" },
+    "d003": { sku: "d003", name: "Seal Ring Rubber" },
+    "e001": { sku: "e001", name: "Bearing Ball 6203" },
+    "e002": { sku: "e002", name: "Shaft Steel 15mm" },
+    "e003": { sku: "e003", name: "Gear Wheel 24T" }
+};
+
+// Inventory Table - Current quantities by location (separate from catalog)
+let inventoryTable = {};
+
+// BOM Definitions - Assembly recipes
+let bomDefinitions = {
+    "TK1": {
+        bom_code: "TK1",
+        name: "Wheel Assembly Kit",
+        components: {
+            "a001": 2,  // 2x Bolt M8x20 Steel
+            "b003": 3,  // 3x Metal Bracket L-Type
+            "e001": 1   // 1x Bearing Ball 6203
+        }
     },
-    "a002": {
-        sku: "a002", 
-        name: "Component A002",
-        total_amount: 80,
-        amount_logistics: 20,
-        amount_production_zone_1: 5,
-        amount_production_zone_2: 12,
-        amount_production_zone_3: 3,
-        ...Object.fromEntries(
-            Array.from({length: 30}, (_, i) => [`amount_production_zone_${i + 1}`, 0])
-        )
+    "TK2": {
+        bom_code: "TK2", 
+        name: "Brake System Kit",
+        components: {
+            "a002": 4,  // 4x Washer M8 Zinc
+            "b002": 2,  // 2x Rubber Gasket Large
+            "c003": 1   // 1x Relay 12V 30A
+        }
     },
-    "b003": {
-        sku: "b003",
-        name: "Component B003", 
-        total_amount: 60,
-        amount_logistics: 15,
-        amount_production_zone_1: 8,
-        amount_production_zone_2: 7,
-        amount_production_zone_3: 5,
-        ...Object.fromEntries(
-            Array.from({length: 30}, (_, i) => [`amount_production_zone_${i + 1}`, 0])
-        )
-    },
-    "b004": {
-        sku: "b004",
-        name: "Component B004",
-        total_amount: 120,
-        amount_logistics: 30,
-        amount_production_zone_1: 15,
-        amount_production_zone_2: 20,
-        amount_production_zone_3: 12,
-        ...Object.fromEntries(
-            Array.from({length: 30}, (_, i) => [`amount_production_zone_${i + 1}`, 0])
-        )
+    "TK3": {
+        bom_code: "TK3",
+        name: "Electronics Package",
+        components: {
+            "c001": 1,  // 1x Wire Harness Main
+            "c002": 6,  // 6x Connector 4-Pin
+            "d001": 1,  // 1x Filter Oil Primary
+            "d003": 2   // 2x Seal Ring Rubber
+        }
     }
 };
 
-// Initialize with some realistic data for zones 1-3
-itemTable.a001.amount_production_zone_1 = 10;
-itemTable.a001.amount_production_zone_2 = 15;
-itemTable.a001.amount_production_zone_3 = 8;
+// BOM Transaction Groups - Track assembly-level transactions
+let bomTransactionGroups = [];
 
-itemTable.a002.amount_production_zone_1 = 5;
-itemTable.a002.amount_production_zone_2 = 12;
-itemTable.a002.amount_production_zone_3 = 3;
+// Legacy itemTable - for backward compatibility, combines catalog + inventory
+let itemTable = {};
 
-itemTable.b003.amount_production_zone_1 = 8;
-itemTable.b003.amount_production_zone_2 = 7;
-itemTable.b003.amount_production_zone_3 = 5;
-
-itemTable.b004.amount_production_zone_1 = 15;
-itemTable.b004.amount_production_zone_2 = 20;
-itemTable.b004.amount_production_zone_3 = 12;
+// Function to rebuild legacy itemTable from catalog + inventory
+function rebuildLegacyItemTable() {
+    itemTable = {};
+    Object.keys(itemCatalog).forEach(sku => {
+        // Always create entry if in catalog, even if not in inventory yet
+        const catalogItem = itemCatalog[sku];
+        const inventoryItem = inventoryTable[sku] || {
+            sku: sku,
+            total_amount: 0,
+            amount_logistics: 0,
+            ...Object.fromEntries(
+                Array.from({length: 30}, (_, i) => [`amount_production_zone_${i + 1}`, 0])
+            )
+        };
+        
+        itemTable[sku] = {
+            sku: sku,
+            name: catalogItem.name,
+            ...inventoryItem
+        };
+    });
+}
 
 // Version 2.0.0: Three-table system
 // 1. Yesterday Result Table - Final confirmed inventory from previous day
@@ -91,7 +106,7 @@ let pendingTransactions = [];
 let currentUser = null;
 
 // Available SKUs for dropdown
-const availableSKUs = ["a001", "a002", "b003", "b004"];
+const availableSKUs = ["a001", "a002", "a003", "b001", "b002", "b003", "c001", "c002", "c003", "d001", "d002", "d003", "e001", "e002", "e003"];
 
 // Available locations
 const locations = {
@@ -117,6 +132,13 @@ function initializeThreeTables() {
 
 // Local storage management
 function saveDataToLocalStorage() {
+    // Save new architecture data
+    localStorage.setItem('berjaya_item_catalog', JSON.stringify(itemCatalog));
+    localStorage.setItem('berjaya_inventory_table', JSON.stringify(inventoryTable));
+    localStorage.setItem('berjaya_bom_definitions', JSON.stringify(bomDefinitions));
+    localStorage.setItem('berjaya_bom_transaction_groups', JSON.stringify(bomTransactionGroups));
+    
+    // Legacy support
     localStorage.setItem('berjaya_item_table', JSON.stringify(itemTable));
     localStorage.setItem('berjaya_transaction_log', JSON.stringify(transactionLog));
     
@@ -128,13 +150,30 @@ function saveDataToLocalStorage() {
 }
 
 function loadDataFromLocalStorage() {
-    const savedItemTable = localStorage.getItem('berjaya_item_table');
-    const savedTransactionLog = localStorage.getItem('berjaya_transaction_log');
+    // Load new architecture data
+    const savedItemCatalog = localStorage.getItem('berjaya_item_catalog');
+    const savedInventoryTable = localStorage.getItem('berjaya_inventory_table');
+    const savedBomDefinitions = localStorage.getItem('berjaya_bom_definitions');
+    const savedBomTransactionGroups = localStorage.getItem('berjaya_bom_transaction_groups');
     
-    if (savedItemTable) {
-        itemTable = JSON.parse(savedItemTable);
+    if (savedItemCatalog) {
+        itemCatalog = JSON.parse(savedItemCatalog);
+    }
+    if (savedInventoryTable) {
+        inventoryTable = JSON.parse(savedInventoryTable);
+    }
+    if (savedBomDefinitions) {
+        bomDefinitions = JSON.parse(savedBomDefinitions);
+    }
+    if (savedBomTransactionGroups) {
+        bomTransactionGroups = JSON.parse(savedBomTransactionGroups);
     }
     
+    // Rebuild legacy itemTable
+    rebuildLegacyItemTable();
+    
+    // Legacy loading
+    const savedTransactionLog = localStorage.getItem('berjaya_transaction_log');
     if (savedTransactionLog) {
         transactionLog = JSON.parse(savedTransactionLog);
     }
@@ -180,11 +219,104 @@ function getItemBySKU(sku) {
 }
 
 function getAvailableSKUs() {
-    return availableSKUs;
+    return Object.keys(itemCatalog);
 }
 
 function getLocations() {
     return locations;
+}
+
+// New BOM access functions
+function getItemCatalog() {
+    return itemCatalog;
+}
+
+function getInventoryTable() {
+    return inventoryTable;
+}
+
+function getBOMDefinitions() {
+    return bomDefinitions;
+}
+
+function getBOMTransactionGroups() {
+    return bomTransactionGroups;
+}
+
+function getBOMBySKU(bomCode) {
+    return bomDefinitions[bomCode] || null;
+}
+
+// BOM Transaction Group Functions
+function createBOMTransactionGroup(bomCode, quantity, fromLocation, toLocation) {
+    const bom = getBOMBySKU(bomCode);
+    if (!bom) {
+        throw new Error(`BOM ${bomCode} not found`);
+    }
+    
+    // Generate unique group ID
+    const groupId = `BG-${Date.now()}-${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`;
+    
+    const bomGroup = {
+        group_id: groupId,
+        bom_code: bomCode,
+        bom_name: bom.name,
+        quantity: parseInt(quantity),
+        from_location: fromLocation,
+        to_location: toLocation,
+        created_by: currentUser ? currentUser.email : 'test@user.com',
+        created_at: new Date().toISOString(),
+        status: 'pending',
+        component_transactions: [],
+        expansion: {}
+    };
+    
+    // Calculate component expansion
+    Object.keys(bom.components).forEach(componentSku => {
+        const componentQuantity = bom.components[componentSku] * quantity;
+        bomGroup.expansion[componentSku] = componentQuantity;
+    });
+    
+    // Generate single OTP for the entire BOM group
+    const bomOTP = Math.floor(1000 + Math.random() * 9000).toString();
+    bomGroup.otp = bomOTP;
+    
+    // Create individual component transactions with same OTP
+    Object.keys(bomGroup.expansion).forEach(componentSku => {
+        const componentQuantity = bomGroup.expansion[componentSku];
+        const componentTransaction = createTransactionWithOTP(
+            componentSku, 
+            componentQuantity, 
+            fromLocation, 
+            toLocation,
+            groupId, // Link back to BOM group (without BOM- prefix)
+            bomOTP // Use same OTP for all components in BOM
+        );
+        bomGroup.component_transactions.push(componentTransaction.id);
+    });
+    
+    // Save BOM group
+    bomTransactionGroups.push(bomGroup);
+    saveDataToLocalStorage();
+    
+    console.log(`BOM Transaction Group created: ${groupId} (${quantity}x ${bomCode})`);
+    console.log(`Expanded to:`, bomGroup.expansion);
+    
+    return bomGroup;
+}
+
+function getBOMTransactionGroupById(groupId) {
+    return bomTransactionGroups.find(group => group.group_id === groupId) || null;
+}
+
+function updateBOMTransactionGroupStatus(groupId, status) {
+    const group = getBOMTransactionGroupById(groupId);
+    if (group) {
+        group.status = status;
+        group.updated_at = new Date().toISOString();
+        saveDataToLocalStorage();
+    }
+    return group;
 }
 
 // Transaction functions
@@ -291,8 +423,17 @@ function clearCurrentUser() {
     currentUser = null;
 }
 
+// Clear all transaction data
+function clearAllTransactionData() {
+    pendingTransactions = [];
+    transactionLog = [];
+    bomTransactionGroups = [];
+    saveDataToLocalStorage(); // Make sure changes are saved immediately
+    console.log('All transaction data cleared and saved');
+}
+
 // Version 2.0.0: Transaction functions with OTP
-function createTransaction(sku, amount, fromLocation, toLocation) {
+function createTransactionWithOTP(sku, amount, fromLocation, toLocation, bomGroupId = null, providedOTP = null) {
     // Check if this is a waste or lost transaction (auto-confirm these)
     const isWasteOrLost = (toLocation === 'waste' || toLocation === 'lost');
     
@@ -312,7 +453,8 @@ function createTransaction(sku, amount, fromLocation, toLocation) {
         to_location: toLocation,
         created_by: currentUser ? currentUser.email : 'test@user.com',
         created_at: new Date().toISOString(),
-        transaction_type: 'transfer'
+        transaction_type: 'transfer',
+        bom_group_id: bomGroupId  // Link to BOM group if this is part of a BOM transaction
     };
     
     if (isWasteOrLost) {
@@ -344,8 +486,8 @@ function createTransaction(sku, amount, fromLocation, toLocation) {
         
         console.log('Waste/Lost transaction auto-approved:', transaction);
     } else {
-        // Regular transaction - requires OTP confirmation
-        const otp = Math.floor(1000 + Math.random() * 9000).toString();
+        // Regular transaction - use provided OTP or generate new one
+        const otp = providedOTP || Math.floor(1000 + Math.random() * 9000).toString();
         transaction.otp = otp;
         transaction.status = 'pending';
         transaction.expires_at = new Date(Date.now() + 3600000).toISOString(); // 1 hour expiry
@@ -356,6 +498,11 @@ function createTransaction(sku, amount, fromLocation, toLocation) {
     
     saveDataToLocalStorage();
     return transaction;
+}
+
+// Original createTransaction function now calls the new one
+function createTransaction(sku, amount, fromLocation, toLocation, bomGroupId = null) {
+    return createTransactionWithOTP(sku, amount, fromLocation, toLocation, bomGroupId, null);
 }
 
 function confirmTransaction(transactionId, enteredOtp) {
@@ -434,11 +581,68 @@ function getPendingTransactions(location = null) {
 locations.waste = "Waste Bin";
 locations.lost = "Lost Items";
 
+// Function to populate test inventory data
+function populateTestInventory() {
+    console.log('Populating test inventory data...');
+    
+    // Clear existing inventory
+    inventoryTable = {};
+    
+    // Generate random inventory for all catalog items
+    Object.keys(itemCatalog).forEach(sku => {
+        const baseAmount = Math.floor(Math.random() * 200) + 50; // 50-250 base amount
+        const logisticsAmount = Math.floor(baseAmount * 0.6); // 60% in logistics
+        
+        inventoryTable[sku] = {
+            sku: sku,
+            amount_logistics: logisticsAmount,
+            ...Object.fromEntries(
+                Array.from({length: 30}, (_, i) => [`amount_production_zone_${i + 1}`, 0])
+            )
+        };
+        
+        // Distribute remaining to first 5 production zones
+        let remaining = baseAmount - logisticsAmount;
+        for (let i = 1; i <= 5 && remaining > 0; i++) {
+            const zoneAmount = Math.floor(Math.random() * (remaining * 0.4)) + 1;
+            inventoryTable[sku][`amount_production_zone_${i}`] = zoneAmount;
+            remaining -= zoneAmount;
+        }
+        
+        // Calculate total
+        let total = inventoryTable[sku].amount_logistics;
+        for (let i = 1; i <= 30; i++) {
+            total += inventoryTable[sku][`amount_production_zone_${i}`] || 0;
+        }
+        inventoryTable[sku].total_amount = total;
+    });
+    
+    // Rebuild legacy itemTable and save
+    rebuildLegacyItemTable();
+    saveDataToLocalStorage();
+    
+    console.log('Test inventory populated for', Object.keys(inventoryTable).length, 'items');
+    return inventoryTable;
+}
+
 // Initialize data on page load
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Loading local data...');
     loadDataFromLocalStorage();
-    console.log('Local data loaded. Item table:', itemTable);
+    
+    // If no inventory data exists, populate test data
+    if (Object.keys(inventoryTable).length === 0) {
+        populateTestInventory();
+    }
+    
+    // Build legacy itemTable from new architecture
+    rebuildLegacyItemTable();
+    
+    console.log('Local data loaded:');
+    console.log('- Item catalog:', Object.keys(itemCatalog).length, 'items');
+    console.log('- Inventory table:', Object.keys(inventoryTable).length, 'items');
+    console.log('- BOM definitions:', Object.keys(bomDefinitions).length, 'BOMs');
+    console.log('- Legacy item table:', Object.keys(itemTable).length, 'items');
     
     // Initialize three-table system if not already done
     if (Object.keys(yesterdayResultTable).length === 0) {

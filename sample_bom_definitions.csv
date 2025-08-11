@@ -1,0 +1,11 @@
+BOM_Code,Component_SKU,Quantity,BOM_Name
+TK1,A001,2,Wheel Assembly Kit
+TK1,B003,3,Wheel Assembly Kit
+TK1,E001,1,Wheel Assembly Kit
+TK2,A002,4,Brake System Kit
+TK2,B002,2,Brake System Kit
+TK2,C003,1,Brake System Kit
+TK3,C001,1,Electronics Package
+TK3,C002,6,Electronics Package
+TK3,D001,1,Electronics Package
+TK3,D003,2,Electronics Package
