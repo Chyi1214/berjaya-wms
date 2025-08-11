@@ -1095,10 +1095,20 @@ window.createOutgoingTransaction = async function(fromLocation) {
             `Transaction ID: ${transaction.id}\n\nItems sent to ${destination === 'waste' ? 'Waste Bin' : 'Lost Items'} successfully.\n\nNo confirmation needed - transaction completed automatically.`
         );
     } else {
-        await modal.alert(
-            '🚀 Transaction Created!',
-            `Transaction ID: ${transaction.id}\nOTP: ${transaction.otp}\n\nShare this OTP with the receiver to confirm the transaction.`
-        );
+        // Create a custom modal for OTP display with big font
+        await modal.show({
+            title: '🚀 Transaction Created!',
+            message: `Transaction ID: ${transaction.id}\n\nShare this OTP with the receiver:`,
+            showCancel: false,
+            confirmText: 'OK',
+            customContent: `<div style="text-align: center; margin: 20px 0;">
+                <div style="font-size: 36px; font-weight: bold; color: #4169E1; letter-spacing: 4px; 
+                           padding: 15px; background: #f0f8ff; border-radius: 8px; border: 2px dashed #4169E1;">
+                    ${transaction.otp}
+                </div>
+                <p style="margin-top: 10px; color: #666;">Receiver needs to enter this code</p>
+            </div>`
+        });
     }
     
     // Clear form
@@ -1266,6 +1276,11 @@ class CustomModal {
             // Set content
             this.title.textContent = config.title || 'Confirmation';
             this.message.textContent = config.message || '';
+            
+            // Handle custom content (like big OTP display)
+            if (config.customContent) {
+                this.message.innerHTML = (config.message || '') + config.customContent;
+            }
             
             // Handle input field
             if (config.showInput) {
